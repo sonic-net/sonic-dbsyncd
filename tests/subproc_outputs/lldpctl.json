@@ -1,0 +1,1345 @@
+{
+  "lldp": {
+    "interface": [
+      {
+        "eth0": {
+          "rid": "2",
+          "port": {
+            "id": {
+              "type": "ifname",
+              "value": "ge-0/0/17"
+            },
+            "descr": "TPS report vending machine",
+            "mfs": "1514",
+            "auto-negotiation": {
+              "supported": true,
+              "enabled": true,
+              "advertised": [
+                {
+                  "type": "10Base-T",
+                  "hd": true,
+                  "fd": true
+                },
+                {
+                  "type": "100Base-TX",
+                  "hd": true,
+                  "fd": true
+                },
+                {
+                  "type": "1000Base-T",
+                  "hd": false,
+                  "fd": true
+                }
+              ],
+              "current": "unknown"
+            }
+          },
+          "via": "LLDP",
+          "age": "0 day, 05:09:02",
+          "chassis": {
+            "switch218ad08": {
+              "id": {
+                "type": "mac",
+                "value": "00:11:22:33:44:55"
+              },
+              "ttl": "90",
+              "descr": "I'm going to need you to come in on saturday",
+              "capability": [
+                {
+                  "type": "Bridge",
+                  "enabled": true
+                },
+                {
+                  "type": "Router",
+                  "enabled": true
+                }
+              ]
+            }
+          },
+          "vlan": {
+            "vlan-id": "146",
+            "pvid": true,
+            "value": "ntp"
+          },
+          "lldp-med": {
+            "capability": [
+              {
+                "type": "Capabilities",
+                "available": true
+              },
+              {
+                "type": "Policy",
+                "available": true
+              },
+              {
+                "type": "Location",
+                "available": true
+              },
+              {
+                "type": "MDI/PSE",
+                "available": true
+              }
+            ],
+            "device-type": "Network Connectivity Device"
+          },
+          "unknown-tlvs": {
+            "unknown-tlv": {
+              "oui": "00,90,69",
+              "subtype": "1",
+              "len": "12",
+              "value": "43,55,30,32,31,33,35,31,30,36,35,30"
+            }
+          }
+        }
+      },
+      {
+        "Ethernet0": {
+          "rid": "1",
+          "port": {
+            "id": {
+              "type": "ifname",
+              "value": "Ethernet1"
+            },
+            "mfs": "9236"
+          },
+          "via": "LLDP",
+          "chassis": {
+            "switch13": {
+              "mgmt-ip": "10.3.147.196",
+              "id": {
+                "type": "mac",
+                "value": "00:11:22:33:44:55"
+              },
+              "ttl": "120",
+              "descr": "I'm a little teapot.",
+              "capability": [
+                {
+                  "type": "Bridge",
+                  "enabled": true
+                },
+                {
+                  "type": "Router",
+                  "enabled": true
+                }
+              ]
+            }
+          },
+          "age": "0 day, 05:09:05",
+          "vlan": {
+            "vlan-id": "101",
+            "pvid": true
+          }
+        }
+      },
+      {
+        "Ethernet100": {
+          "rid": "1",
+          "port": {
+            "id": {
+              "type": "ifname",
+              "value": "Ethernet26"
+            },
+            "mfs": "9236"
+          },
+          "via": "LLDP",
+          "chassis": {
+            "switch13": {
+              "mgmt-ip": "10.3.147.196",
+              "id": {
+                "type": "mac",
+                "value": "00:11:22:33:44:55"
+              },
+              "ttl": "120",
+              "descr": "I'm a little teapot.",
+              "capability": [
+                {
+                  "type": "Bridge",
+                  "enabled": true
+                },
+                {
+                  "type": "Router",
+                  "enabled": true
+                }
+              ]
+            }
+          },
+          "age": "0 day, 05:09:04",
+          "vlan": {
+            "vlan-id": "126",
+            "pvid": true
+          }
+        }
+      },
+      {
+        "Ethernet104": {
+          "rid": "1",
+          "port": {
+            "id": {
+              "type": "ifname",
+              "value": "Ethernet27"
+            },
+            "mfs": "9236"
+          },
+          "via": "LLDP",
+          "chassis": {
+            "switch13": {
+              "mgmt-ip": "10.3.147.196",
+              "id": {
+                "type": "mac",
+                "value": "00:11:22:33:44:55"
+              },
+              "ttl": "120",
+              "descr": "I'm a little teapot.",
+              "capability": [
+                {
+                  "type": "Bridge",
+                  "enabled": true
+                },
+                {
+                  "type": "Router",
+                  "enabled": true
+                }
+              ]
+            }
+          },
+          "age": "0 day, 05:09:04",
+          "vlan": {
+            "vlan-id": "127",
+            "pvid": true
+          }
+        }
+      },
+      {
+        "Ethernet108": {
+          "rid": "1",
+          "port": {
+            "id": {
+              "type": "ifname",
+              "value": "Ethernet28"
+            },
+            "mfs": "9236"
+          },
+          "via": "LLDP",
+          "chassis": {
+            "switch13": {
+              "mgmt-ip": "10.3.147.196",
+              "id": {
+                "type": "mac",
+                "value": "00:11:22:33:44:55"
+              },
+              "ttl": "120",
+              "descr": "I'm a little teapot.",
+              "capability": [
+                {
+                  "type": "Bridge",
+                  "enabled": true
+                },
+                {
+                  "type": "Router",
+                  "enabled": true
+                }
+              ]
+            }
+          },
+          "age": "0 day, 05:09:04",
+          "vlan": {
+            "vlan-id": "128",
+            "pvid": true
+          }
+        }
+      },
+      {
+        "Ethernet112": {
+          "rid": "1",
+          "port": {
+            "id": {
+              "type": "ifname",
+              "value": "Ethernet29"
+            },
+            "mfs": "9236"
+          },
+          "via": "LLDP",
+          "chassis": {
+            "switch13": {
+              "mgmt-ip": "10.3.147.196",
+              "id": {
+                "type": "mac",
+                "value": "00:11:22:33:44:55"
+              },
+              "ttl": "120",
+              "descr": "I'm a little teapot.",
+              "capability": [
+                {
+                  "type": "Bridge",
+                  "enabled": true
+                },
+                {
+                  "type": "Router",
+                  "enabled": true
+                }
+              ]
+            }
+          },
+          "age": "0 day, 00:35:03",
+          "vlan": {
+            "vlan-id": "129",
+            "pvid": true
+          }
+        }
+      },
+      {
+        "Ethernet116": {
+          "rid": "1",
+          "port": {
+            "id": {
+              "type": "ifname",
+              "value": "Ethernet30"
+            },
+            "mfs": "9236"
+          },
+          "via": "LLDP",
+          "chassis": {
+            "switch13": {
+              "mgmt-ip": "10.3.147.196",
+              "id": {
+                "type": "mac",
+                "value": "00:11:22:33:44:55"
+              },
+              "ttl": "120",
+              "descr": "I'm a little teapot.",
+              "capability": [
+                {
+                  "type": "Bridge",
+                  "enabled": true
+                },
+                {
+                  "type": "Router",
+                  "enabled": true
+                }
+              ]
+            }
+          },
+          "age": "0 day, 00:18:33",
+          "vlan": {
+            "vlan-id": "130",
+            "pvid": true
+          }
+        }
+      },
+      {
+        "Ethernet12": {
+          "rid": "1",
+          "port": {
+            "id": {
+              "type": "ifname",
+              "value": "Ethernet4"
+            },
+            "mfs": "9236"
+          },
+          "via": "LLDP",
+          "chassis": {
+            "switch13": {
+              "mgmt-ip": "10.3.147.196",
+              "id": {
+                "type": "mac",
+                "value": "00:11:22:33:44:55"
+              },
+              "ttl": "120",
+              "descr": "I'm a little teapot.",
+              "capability": [
+                {
+                  "type": "Bridge",
+                  "enabled": true
+                },
+                {
+                  "type": "Router",
+                  "enabled": true
+                }
+              ]
+            }
+          },
+          "age": "0 day, 05:09:05",
+          "vlan": {
+            "vlan-id": "104",
+            "pvid": true
+          }
+        }
+      },
+      {
+        "Ethernet120": {
+          "rid": "1",
+          "port": {
+            "id": {
+              "type": "ifname",
+              "value": "Ethernet31"
+            },
+            "mfs": "9236"
+          },
+          "via": "LLDP",
+          "chassis": {
+            "switch13": {
+              "mgmt-ip": "10.3.147.196",
+              "id": {
+                "type": "mac",
+                "value": "00:11:22:33:44:55"
+              },
+              "ttl": "120",
+              "descr": "I'm a little teapot.",
+              "capability": [
+                {
+                  "type": "Bridge",
+                  "enabled": true
+                },
+                {
+                  "type": "Router",
+                  "enabled": true
+                }
+              ]
+            }
+          },
+          "age": "0 day, 01:04:04",
+          "vlan": {
+            "vlan-id": "131",
+            "pvid": true
+          }
+        }
+      },
+      {
+        "Ethernet124": {
+          "rid": "1",
+          "port": {
+            "id": {
+              "type": "ifname",
+              "value": "Ethernet32"
+            },
+            "mfs": "9236"
+          },
+          "via": "LLDP",
+          "chassis": {
+            "switch13": {
+              "mgmt-ip": "10.3.147.196",
+              "id": {
+                "type": "mac",
+                "value": "00:11:22:33:44:55"
+              },
+              "ttl": "120",
+              "descr": "I'm a little teapot.",
+              "capability": [
+                {
+                  "type": "Bridge",
+                  "enabled": true
+                },
+                {
+                  "type": "Router",
+                  "enabled": true
+                }
+              ]
+            }
+          },
+          "age": "0 day, 01:20:34",
+          "vlan": {
+            "vlan-id": "132",
+            "pvid": true
+          }
+        }
+      },
+      {
+        "Ethernet16": {
+          "rid": "1",
+          "port": {
+            "id": {
+              "type": "ifname",
+              "value": "Ethernet5"
+            },
+            "mfs": "9236"
+          },
+          "via": "LLDP",
+          "chassis": {
+            "switch13": {
+              "mgmt-ip": "10.3.147.196",
+              "id": {
+                "type": "mac",
+                "value": "00:11:22:33:44:55"
+              },
+              "ttl": "120",
+              "descr": "I'm a little teapot.",
+              "capability": [
+                {
+                  "type": "Bridge",
+                  "enabled": true
+                },
+                {
+                  "type": "Router",
+                  "enabled": true
+                }
+              ]
+            }
+          },
+          "age": "0 day, 05:09:05",
+          "vlan": {
+            "vlan-id": "105",
+            "pvid": true
+          }
+        }
+      },
+      {
+        "Ethernet20": {
+          "rid": "1",
+          "port": {
+            "id": {
+              "type": "ifname",
+              "value": "Ethernet6"
+            },
+            "mfs": "9236"
+          },
+          "via": "LLDP",
+          "chassis": {
+            "switch13": {
+              "mgmt-ip": "10.3.147.196",
+              "id": {
+                "type": "mac",
+                "value": "00:11:22:33:44:55"
+              },
+              "ttl": "120",
+              "descr": "I'm a little teapot.",
+              "capability": [
+                {
+                  "type": "Bridge",
+                  "enabled": true
+                },
+                {
+                  "type": "Router",
+                  "enabled": true
+                }
+              ]
+            }
+          },
+          "age": "0 day, 05:09:05",
+          "vlan": {
+            "vlan-id": "106",
+            "pvid": true
+          }
+        }
+      },
+      {
+        "Ethernet24": {
+          "rid": "1",
+          "port": {
+            "id": {
+              "type": "ifname",
+              "value": "Ethernet7"
+            },
+            "mfs": "9236"
+          },
+          "via": "LLDP",
+          "chassis": {
+            "switch13": {
+              "mgmt-ip": "10.3.147.196",
+              "id": {
+                "type": "mac",
+                "value": "00:11:22:33:44:55"
+              },
+              "ttl": "120",
+              "descr": "I'm a little teapot.",
+              "capability": [
+                {
+                  "type": "Bridge",
+                  "enabled": true
+                },
+                {
+                  "type": "Router",
+                  "enabled": true
+                }
+              ]
+            }
+          },
+          "age": "0 day, 00:29:35",
+          "vlan": {
+            "vlan-id": "107",
+            "pvid": true
+          }
+        }
+      },
+      {
+        "Ethernet28": {
+          "rid": "1",
+          "port": {
+            "id": {
+              "type": "ifname",
+              "value": "Ethernet8"
+            },
+            "mfs": "9236"
+          },
+          "via": "LLDP",
+          "chassis": {
+            "switch13": {
+              "mgmt-ip": "10.3.147.196",
+              "id": {
+                "type": "mac",
+                "value": "00:11:22:33:44:55"
+              },
+              "ttl": "120",
+              "descr": "I'm a little teapot.",
+              "capability": [
+                {
+                  "type": "Bridge",
+                  "enabled": true
+                },
+                {
+                  "type": "Router",
+                  "enabled": true
+                }
+              ]
+            }
+          },
+          "age": "0 day, 05:08:33",
+          "vlan": {
+            "vlan-id": "108",
+            "pvid": true
+          }
+        }
+      },
+      {
+        "Ethernet32": {
+          "rid": "1",
+          "port": {
+            "id": {
+              "type": "ifname",
+              "value": "Ethernet9"
+            },
+            "mfs": "9236"
+          },
+          "via": "LLDP",
+          "chassis": {
+            "switch13": {
+              "mgmt-ip": "10.3.147.196",
+              "id": {
+                "type": "mac",
+                "value": "00:11:22:33:44:55"
+              },
+              "ttl": "120",
+              "descr": "I'm a little teapot.",
+              "capability": [
+                {
+                  "type": "Bridge",
+                  "enabled": true
+                },
+                {
+                  "type": "Router",
+                  "enabled": true
+                }
+              ]
+            }
+          },
+          "age": "0 day, 00:19:02",
+          "vlan": {
+            "vlan-id": "109",
+            "pvid": true
+          }
+        }
+      },
+      {
+        "Ethernet36": {
+          "rid": "1",
+          "port": {
+            "id": {
+              "type": "ifname",
+              "value": "Ethernet10"
+            },
+            "mfs": "9236"
+          },
+          "via": "LLDP",
+          "chassis": {
+            "switch13": {
+              "mgmt-ip": "10.3.147.196",
+              "id": {
+                "type": "mac",
+                "value": "00:11:22:33:44:55"
+              },
+              "ttl": "120",
+              "descr": "I'm a little teapot.",
+              "capability": [
+                {
+                  "type": "Bridge",
+                  "enabled": true
+                },
+                {
+                  "type": "Router",
+                  "enabled": true
+                }
+              ]
+            }
+          },
+          "age": "0 day, 00:02:32",
+          "vlan": {
+            "vlan-id": "110",
+            "pvid": true
+          }
+        }
+      },
+      {
+        "Ethernet4": {
+          "rid": "1",
+          "port": {
+            "id": {
+              "type": "ifname",
+              "value": "Ethernet2"
+            },
+            "mfs": "9236"
+          },
+          "via": "LLDP",
+          "chassis": {
+            "switch13": {
+              "mgmt-ip": "10.3.147.196",
+              "id": {
+                "type": "mac",
+                "value": "00:11:22:33:44:55"
+              },
+              "ttl": "120",
+              "descr": "I'm a little teapot.",
+              "capability": [
+                {
+                  "type": "Bridge",
+                  "enabled": true
+                },
+                {
+                  "type": "Router",
+                  "enabled": true
+                }
+              ]
+            }
+          },
+          "age": "0 day, 05:09:03",
+          "vlan": {
+            "vlan-id": "102",
+            "pvid": true
+          }
+        }
+      },
+      {
+        "Ethernet40": {
+          "rid": "1",
+          "port": {
+            "id": {
+              "type": "ifname",
+              "value": "Ethernet11"
+            },
+            "mfs": "9236"
+          },
+          "via": "LLDP",
+          "chassis": {
+            "switch13": {
+              "mgmt-ip": "10.3.147.196",
+              "id": {
+                "type": "mac",
+                "value": "00:11:22:33:44:55"
+              },
+              "ttl": "120",
+              "descr": "I'm a little teapot.",
+              "capability": [
+                {
+                  "type": "Bridge",
+                  "enabled": true
+                },
+                {
+                  "type": "Router",
+                  "enabled": true
+                }
+              ]
+            }
+          },
+          "age": "0 day, 00:09:32",
+          "vlan": {
+            "vlan-id": "111",
+            "pvid": true
+          }
+        }
+      },
+      {
+        "Ethernet44": {
+          "rid": "1",
+          "port": {
+            "id": {
+              "type": "ifname",
+              "value": "Ethernet12"
+            },
+            "mfs": "9236"
+          },
+          "via": "LLDP",
+          "chassis": {
+            "switch13": {
+              "mgmt-ip": "10.3.147.196",
+              "id": {
+                "type": "mac",
+                "value": "00:11:22:33:44:55"
+              },
+              "ttl": "120",
+              "descr": "I'm a little teapot.",
+              "capability": [
+                {
+                  "type": "Bridge",
+                  "enabled": true
+                },
+                {
+                  "type": "Router",
+                  "enabled": true
+                }
+              ]
+            }
+          },
+          "age": "0 day, 00:20:02",
+          "vlan": {
+            "vlan-id": "112",
+            "pvid": true
+          }
+        }
+      },
+      {
+        "Ethernet48": {
+          "rid": "1",
+          "port": {
+            "id": {
+              "type": "ifname",
+              "value": "Ethernet13"
+            },
+            "mfs": "9236"
+          },
+          "via": "LLDP",
+          "chassis": {
+            "switch13": {
+              "mgmt-ip": "10.3.147.196",
+              "id": {
+                "type": "mac",
+                "value": "00:11:22:33:44:55"
+              },
+              "ttl": "120",
+              "descr": "I'm a little teapot.",
+              "capability": [
+                {
+                  "type": "Bridge",
+                  "enabled": true
+                },
+                {
+                  "type": "Router",
+                  "enabled": true
+                }
+              ]
+            }
+          },
+          "age": "0 day, 00:20:02",
+          "vlan": {
+            "vlan-id": "113",
+            "pvid": true
+          }
+        }
+      },
+      {
+        "Ethernet52": {
+          "rid": "1",
+          "port": {
+            "id": {
+              "type": "ifname",
+              "value": "Ethernet14"
+            },
+            "mfs": "9236"
+          },
+          "via": "LLDP",
+          "chassis": {
+            "switch13": {
+              "mgmt-ip": "10.3.147.196",
+              "id": {
+                "type": "mac",
+                "value": "00:11:22:33:44:55"
+              },
+              "ttl": "120",
+              "descr": "I'm a little teapot.",
+              "capability": [
+                {
+                  "type": "Bridge",
+                  "enabled": true
+                },
+                {
+                  "type": "Router",
+                  "enabled": true
+                }
+              ]
+            }
+          },
+          "age": "0 day, 05:09:03",
+          "vlan": {
+            "vlan-id": "114",
+            "pvid": true
+          }
+        }
+      },
+      {
+        "Ethernet56": {
+          "rid": "1",
+          "port": {
+            "id": {
+              "type": "ifname",
+              "value": "Ethernet15"
+            },
+            "mfs": "9236"
+          },
+          "via": "LLDP",
+          "chassis": {
+            "switch13": {
+              "mgmt-ip": "10.3.147.196",
+              "id": {
+                "type": "mac",
+                "value": "00:11:22:33:44:55"
+              },
+              "ttl": "120",
+              "descr": "I'm a little teapot.",
+              "capability": [
+                {
+                  "type": "Bridge",
+                  "enabled": true
+                },
+                {
+                  "type": "Router",
+                  "enabled": true
+                }
+              ]
+            }
+          },
+          "age": "0 day, 05:09:03",
+          "vlan": {
+            "vlan-id": "115",
+            "pvid": true
+          }
+        }
+      },
+      {
+        "Ethernet60": {
+          "rid": "1",
+          "port": {
+            "id": {
+              "type": "ifname",
+              "value": "Ethernet16"
+            },
+            "mfs": "9236"
+          },
+          "via": "LLDP",
+          "chassis": {
+            "switch13": {
+              "mgmt-ip": "10.3.147.196",
+              "id": {
+                "type": "mac",
+                "value": "00:11:22:33:44:55"
+              },
+              "ttl": "120",
+              "descr": "I'm a little teapot.",
+              "capability": [
+                {
+                  "type": "Bridge",
+                  "enabled": true
+                },
+                {
+                  "type": "Router",
+                  "enabled": true
+                }
+              ]
+            }
+          },
+          "age": "0 day, 05:09:03",
+          "vlan": {
+            "vlan-id": "116",
+            "pvid": true
+          }
+        }
+      },
+      {
+        "Ethernet64": {
+          "rid": "1",
+          "port": {
+            "id": {
+              "type": "ifname",
+              "value": "Ethernet17"
+            },
+            "mfs": "9236"
+          },
+          "via": "LLDP",
+          "chassis": {
+            "switch13": {
+              "mgmt-ip": "10.3.147.196",
+              "id": {
+                "type": "mac",
+                "value": "00:11:22:33:44:55"
+              },
+              "ttl": "120",
+              "descr": "I'm a little teapot.",
+              "capability": [
+                {
+                  "type": "Bridge",
+                  "enabled": true
+                },
+                {
+                  "type": "Router",
+                  "enabled": true
+                }
+              ]
+            }
+          },
+          "age": "0 day, 05:09:03",
+          "vlan": {
+            "vlan-id": "117",
+            "pvid": true
+          }
+        }
+      },
+      {
+        "Ethernet68": {
+          "rid": "1",
+          "port": {
+            "id": {
+              "type": "ifname",
+              "value": "Ethernet18"
+            },
+            "mfs": "9236"
+          },
+          "via": "LLDP",
+          "chassis": {
+            "switch13": {
+              "mgmt-ip": "10.3.147.196",
+              "id": {
+                "type": "mac",
+                "value": "00:11:22:33:44:55"
+              },
+              "ttl": "120",
+              "descr": "I'm a little teapot.",
+              "capability": [
+                {
+                  "type": "Bridge",
+                  "enabled": true
+                },
+                {
+                  "type": "Router",
+                  "enabled": true
+                }
+              ]
+            }
+          },
+          "age": "0 day, 05:09:03",
+          "vlan": {
+            "vlan-id": "118",
+            "pvid": true
+          }
+        }
+      },
+      {
+        "Ethernet72": {
+          "rid": "1",
+          "port": {
+            "id": {
+              "type": "ifname",
+              "value": "Ethernet19"
+            },
+            "mfs": "9236"
+          },
+          "via": "LLDP",
+          "chassis": {
+            "switch13": {
+              "mgmt-ip": "10.3.147.196",
+              "id": {
+                "type": "mac",
+                "value": "00:11:22:33:44:55"
+              },
+              "ttl": "120",
+              "descr": "I'm a little teapot.",
+              "capability": [
+                {
+                  "type": "Bridge",
+                  "enabled": true
+                },
+                {
+                  "type": "Router",
+                  "enabled": true
+                }
+              ]
+            }
+          },
+          "age": "0 day, 05:09:03",
+          "vlan": {
+            "vlan-id": "119",
+            "pvid": true
+          }
+        }
+      },
+      {
+        "Ethernet76": {
+          "rid": "1",
+          "port": {
+            "id": {
+              "type": "ifname",
+              "value": "Ethernet20"
+            },
+            "mfs": "9236"
+          },
+          "via": "LLDP",
+          "chassis": {
+            "switch13": {
+              "mgmt-ip": "10.3.147.196",
+              "id": {
+                "type": "mac",
+                "value": "00:11:22:33:44:55"
+              },
+              "ttl": "120",
+              "descr": "I'm a little teapot.",
+              "capability": [
+                {
+                  "type": "Bridge",
+                  "enabled": true
+                },
+                {
+                  "type": "Router",
+                  "enabled": true
+                }
+              ]
+            }
+          },
+          "age": "0 day, 05:09:03",
+          "vlan": {
+            "vlan-id": "120",
+            "pvid": true
+          }
+        }
+      },
+      {
+        "Ethernet8": {
+          "rid": "1",
+          "port": {
+            "id": {
+              "type": "ifname",
+              "value": "Ethernet3"
+            },
+            "mfs": "9236"
+          },
+          "via": "LLDP",
+          "chassis": {
+            "switch13": {
+              "mgmt-ip": "10.3.147.196",
+              "id": {
+                "type": "mac",
+                "value": "00:11:22:33:44:55"
+              },
+              "ttl": "120",
+              "descr": "I'm a little teapot.",
+              "capability": [
+                {
+                  "type": "Bridge",
+                  "enabled": true
+                },
+                {
+                  "type": "Router",
+                  "enabled": true
+                }
+              ]
+            }
+          },
+          "age": "0 day, 05:09:03",
+          "vlan": {
+            "vlan-id": "103",
+            "pvid": true
+          }
+        }
+      },
+      {
+        "Ethernet80": {
+          "rid": "1",
+          "port": {
+            "id": {
+              "type": "ifname",
+              "value": "Ethernet21"
+            },
+            "mfs": "9236"
+          },
+          "via": "LLDP",
+          "chassis": {
+            "switch13": {
+              "mgmt-ip": "10.3.147.196",
+              "id": {
+                "type": "mac",
+                "value": "00:11:22:33:44:55"
+              },
+              "ttl": "120",
+              "descr": "I'm a little teapot.",
+              "capability": [
+                {
+                  "type": "Bridge",
+                  "enabled": true
+                },
+                {
+                  "type": "Router",
+                  "enabled": true
+                }
+              ]
+            }
+          },
+          "age": "0 day, 00:06:02",
+          "vlan": {
+            "vlan-id": "121",
+            "pvid": true
+          }
+        }
+      },
+      {
+        "Ethernet84": {
+          "rid": "1",
+          "port": {
+            "id": {
+              "type": "ifname",
+              "value": "Ethernet22"
+            },
+            "mfs": "9236"
+          },
+          "via": "LLDP",
+          "chassis": {
+            "switch13": {
+              "mgmt-ip": "10.3.147.196",
+              "id": {
+                "type": "mac",
+                "value": "00:11:22:33:44:55"
+              },
+              "ttl": "120",
+              "descr": "I'm a little teapot.",
+              "capability": [
+                {
+                  "type": "Bridge",
+                  "enabled": true
+                },
+                {
+                  "type": "Router",
+                  "enabled": true
+                }
+              ]
+            }
+          },
+          "age": "0 day, 00:06:02",
+          "vlan": {
+            "vlan-id": "122",
+            "pvid": true
+          }
+        }
+      },
+      {
+        "Ethernet88": {
+          "rid": "1",
+          "port": {
+            "id": {
+              "type": "ifname",
+              "value": "Ethernet23"
+            },
+            "mfs": "9236"
+          },
+          "via": "LLDP",
+          "chassis": {
+            "switch13": {
+              "mgmt-ip": "10.3.147.196",
+              "id": {
+                "type": "mac",
+                "value": "00:11:22:33:44:55"
+              },
+              "ttl": "120",
+              "descr": "I'm a little teapot.",
+              "capability": [
+                {
+                  "type": "Bridge",
+                  "enabled": true
+                },
+                {
+                  "type": "Router",
+                  "enabled": true
+                }
+              ]
+            }
+          },
+          "age": "0 day, 00:01:32",
+          "vlan": {
+            "vlan-id": "123",
+            "pvid": true
+          }
+        }
+      },
+      {
+        "Ethernet92": {
+          "rid": "1",
+          "port": {
+            "id": {
+              "type": "ifname",
+              "value": "Ethernet24"
+            },
+            "mfs": "9236"
+          },
+          "via": "LLDP",
+          "chassis": {
+            "switch13": {
+              "mgmt-ip": "10.3.147.196",
+              "id": {
+                "type": "mac",
+                "value": "00:11:22:33:44:55"
+              },
+              "ttl": "120",
+              "descr": "I'm a little teapot.",
+              "capability": [
+                {
+                  "type": "Bridge",
+                  "enabled": true
+                },
+                {
+                  "type": "Router",
+                  "enabled": true
+                }
+              ]
+            }
+          },
+          "age": "0 day, 00:00:32",
+          "vlan": {
+            "vlan-id": "124",
+            "pvid": true
+          }
+        }
+      },
+      {
+        "Ethernet96": {
+          "rid": "1",
+          "port": {
+            "id": {
+              "type": "ifname",
+              "value": "Ethernet25"
+            },
+            "mfs": "9236"
+          },
+          "via": "LLDP",
+          "chassis": {
+            "switch13": {
+              "mgmt-ip": "10.3.147.196",
+              "id": {
+                "type": "mac",
+                "value": "00:11:22:33:44:55"
+              },
+              "ttl": "120",
+              "descr": "I'm a little teapot.",
+              "capability": [
+                {
+                  "type": "Bridge",
+                  "enabled": true
+                },
+                {
+                  "type": "Router",
+                  "enabled": true
+                }
+              ]
+            }
+          },
+          "age": "0 day, 05:09:03",
+          "vlan": {
+            "vlan-id": "125",
+            "pvid": true
+          }
+        }
+      }
+    ]
+  }
+}
