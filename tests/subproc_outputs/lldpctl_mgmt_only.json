@@ -1,0 +1,95 @@
+{
+  "lldp": {
+    "interface": {
+      "eth0": {
+        "port": {
+          "id": {
+            "type": "local",
+            "value": "535"
+          },
+          "auto-negotiation": {
+            "enabled": true,
+            "supported": true,
+            "advertised": [
+              {
+                "hd": true,
+                "type": "10Base-T",
+                "fd": true
+              },
+              {
+                "hd": true,
+                "type": "100Base-TX",
+                "fd": true
+              },
+              {
+                "hd": false,
+                "type": "1000Base-T",
+                "fd": true
+              }
+            ],
+            "current": "unknown"
+          },
+          "descr": "ge-0/0/15.0",
+          "mfs": "1514"
+        },
+        "via": "LLDP",
+        "vlan": {
+          "pvid": true,
+          "vlan-id": "146",
+          "value": "ntp"
+        },
+        "lldp-med": {
+          "device-type": "Network Connectivity Device",
+          "capability": [
+            {
+              "type": "Capabilities",
+              "available": true
+            },
+            {
+              "type": "Policy",
+              "available": true
+            },
+            {
+              "type": "Location",
+              "available": true
+            },
+            {
+              "type": "MDI/PSE",
+              "available": true
+            }
+          ]
+        },
+        "rid": "1",
+        "age": "0 day, 00:17:02",
+        "chassis": {
+          "switchad11": {
+            "id": {
+              "type": "mac",
+              "value": "00:11:22:33:44:55"
+            },
+            "capability": [
+              {
+                "type": "Bridge",
+                "enabled": true
+              },
+              {
+                "type": "Router",
+                "enabled": true
+              }
+            ],
+            "ttl": "90",
+            "descr": "I'm going to need you to come in on saturday"
+          }
+        },
+        "unknown-tlvs": {
+          "unknown-tlv": {
+            "oui": "00,90,69",
+            "subtype": "1",
+            "len": "12",
+            "value": "43,55,30,32,31,33,35,31,30,35,37,39"
+          }
+        }
+      }
+    }
+  }
+}
