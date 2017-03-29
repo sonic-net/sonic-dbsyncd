@@ -3,8 +3,8 @@ import json
 import os
 
 import mockredis
-import sswsdk.interface
-from sswsdk.interface import redis
+import swsssdk.interface
+from swsssdk.interface import redis
 
 
 def _subscribe_keyspace_notification(self, db_name, client):
@@ -18,9 +18,9 @@ def config_set(self, *args):
 INPUT_DIR = os.path.dirname(os.path.abspath(__file__))
 
 
-class SSWSyncClient(mockredis.MockRedis):
+class SwssSyncClient(mockredis.MockRedis):
     def __init__(self, *args, **kwargs):
-        super(SSWSyncClient, self).__init__(strict=True, *args, **kwargs)
+        super(SwssSyncClient, self).__init__(strict=True, *args, **kwargs)
         db = kwargs.pop('db')
         if db == 0:
             with open(INPUT_DIR + '/LLDP_ENTRY_TABLE.json') as f:
@@ -30,6 +30,6 @@ class SSWSyncClient(mockredis.MockRedis):
                         self.hset(h, k, v)
 
 
-sswsdk.interface.DBInterface._subscribe_keyspace_notification = _subscribe_keyspace_notification
+swsssdk.interface.DBInterface._subscribe_keyspace_notification = _subscribe_keyspace_notification
 mockredis.MockRedis.config_set = config_set
-redis.StrictRedis = SSWSyncClient
+redis.StrictRedis = SwssSyncClient
