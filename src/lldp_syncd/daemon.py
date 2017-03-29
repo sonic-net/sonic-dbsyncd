@@ -6,7 +6,7 @@ import time
 from collections import defaultdict
 
 from enum import unique, Enum
-from sswsdk import SonicV2Connector
+from swsssdk import SonicV2Connector
 
 from sonic_syncd import SonicSyncDaemon
 from . import logger
