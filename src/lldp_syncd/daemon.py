@@ -194,7 +194,7 @@ class LldpSyncDaemon(SonicSyncDaemon):
             rem_desc = rem_attributes.get('descr')
         except (KeyError, ValueError):
             logger.exception("Could not infer system information from: {}".format(chassis_attributes))
-            chassis_id_subtype, chassis_id, rem_name, rem_desc = None
+            chassis_id_subtype = chassis_id = rem_name = rem_desc = None
 
         return {
             # lldpRemChassisIdSubtype   LldpChassisIdSubtype,
