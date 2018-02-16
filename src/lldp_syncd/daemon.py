@@ -231,6 +231,13 @@ class LldpSyncDaemon(SonicSyncDaemon):
         Sync LLDP information to redis DB.
         """
         logger.debug("Initiating LLDPd sync to Redis...")
+
+        # First, delete all entries from the LLDP_ENTRY_TABLE
+        client = self.db_connector.redis_clients[self.db_connector.APPL_DB]
+        pattern = '{}:*'.format(LldpSyncDaemon.LLDP_ENTRY_TABLE)
+        self.db_connector.delete_all_by_pattern(self.db_connector.APPL_DB, pattern)
+
+        # Repopulate LLDP_ENTRY_TABLE by adding all elements from parsed_update
         for interface, if_attributes in parsed_update.items():
             if re.match(SONIC_ETHERNET_RE_PATTERN, interface) is None:
                 logger.warning("Ignoring interface '{}'".format(interface))
