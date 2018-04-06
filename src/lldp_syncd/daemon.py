@@ -10,7 +10,7 @@ from swsssdk import SonicV2Connector
 
 from sonic_syncd import SonicSyncDaemon
 from . import logger
-from .conventions import LldpPortIdSubtype, LldpChassisIdSubtype
+from .conventions import LldpPortIdSubtype, LldpChassisIdSubtype, LldpSystemCapabilitiesMap
 
 LLDPD_TIME_FORMAT = '%H:%M:%S'
 
@@ -109,6 +109,38 @@ class LldpSyncDaemon(SonicSyncDaemon):
         # chassis = int(LldpChassisIdSubtype.chassisComponent) # (unsupported by lldpd)
         local = int(LldpPortIdSubtype.local)
 
+    def get_sys_capability_list(self, if_attributes):
+        """
+        Get a list of capabilities from interface attributes dictionary.
+        :param if_attributes: interface attributes
+        :return: list of capabilities
+        """
+        try:
+            # [{'enabled': ..., 'type': 'capability1'}, {'enabled': ..., 'type': 'capability2'}]
+            capability_list = if_attributes['chassis'].values()[0]['capability']
+        except KeyError:
+            logger.error("Failed to get system capabilities")
+        # {'enabled': ..., 'type': 'capability'}
+        if not isinstance(capability_list, list):
+            capability_list = [capability_list]
+        return capability_list
+
+    def parse_sys_capabilities(self, capability_list, enabled=False):
+        """
+        Get a bit map of capabilities, accoding to textual convention.
+        :param capability_list: list of capabilities
+        :param enabled: if true, consider only the enabled capabilities
+        :return: string representing a bit map
+        """
+        sys_cap = 0x00
+        for capability in capability_list:
+            try:
+                if (not enabled) or capability["enabled"]:
+                    sys_cap |= 128 >> LldpSystemCapabilitiesMap[capability["type"].lower()]
+            except KeyError:
+                logger.warning("Unknown capability {}".format(capability["type"]))
+        return "%0.2X 00" % sys_cap
+
     def __init__(self, update_interval=None):
         super(LldpSyncDaemon, self).__init__()
         self._update_interval = update_interval or DEFAULT_UPDATE_INTERVAL
@@ -148,8 +180,8 @@ class LldpSyncDaemon(SonicSyncDaemon):
 
         LldpRemEntry ::= SEQUENCE {
               lldpRemTimeMark           TimeFilter,
-              *lldpRemLocalPortNum       LldpPortNumber,
-              *lldpRemIndex              Integer32,
+              lldpRemLocalPortNum       LldpPortNumber,
+              lldpRemIndex              Integer32,
               lldpRemChassisIdSubtype   LldpChassisIdSubtype,
               lldpRemChassisId          LldpChassisId,
               lldpRemPortIdSubtype      LldpPortIdSubtype,
@@ -157,11 +189,10 @@ class LldpSyncDaemon(SonicSyncDaemon):
               lldpRemPortDesc           SnmpAdminString,
               lldpRemSysName            SnmpAdminString,
               lldpRemSysDesc            SnmpAdminString,
-              *lldpRemSysCapSupported    LldpSystemCapabilitiesMap,
-              *lldpRemSysCapEnabled      LldpSystemCapabilitiesMap
+              lldpRemSysCapSupported    LldpSystemCapabilitiesMap,
+              lldpRemSysCapEnabled      LldpSystemCapabilitiesMap
         }
         """
-        # TODO: *Implement
         try:
             interface_list = lldp_json['lldp'].get('interface') or []
             parsed_interfaces = defaultdict(dict)
@@ -181,6 +212,17 @@ class LldpSyncDaemon(SonicSyncDaemon):
 
                 # lldpRemTimeMark           TimeFilter,
                 parsed_interfaces[if_name].update({'lldp_rem_time_mark': str(parse_time(if_attributes.get('age')))})
+
+                # lldpRemIndex
+                parsed_interfaces[if_name].update({'lldp_rem_index': str(if_attributes.get('rid'))})
+
+                capability_list = self.get_sys_capability_list(if_attributes)
+                # lldpSysCapSupported
+                parsed_interfaces[if_name].update({'lldp_rem_sys_cap_supported':
+                                                   self.parse_sys_capabilities(capability_list)})
+                # lldpSysCapEnabled
+                parsed_interfaces[if_name].update({'lldp_rem_sys_cap_enabled':
+                                                   self.parse_sys_capabilities(capability_list, enabled=True)})
 
             return parsed_interfaces
         except (KeyError, ValueError):
@@ -239,6 +281,7 @@ class LldpSyncDaemon(SonicSyncDaemon):
 
         # Repopulate LLDP_ENTRY_TABLE by adding all elements from parsed_update
         for interface, if_attributes in parsed_update.items():
+
             if re.match(SONIC_ETHERNET_RE_PATTERN, interface) is None:
                 logger.warning("Ignoring interface '{}'".format(interface))
                 continue
