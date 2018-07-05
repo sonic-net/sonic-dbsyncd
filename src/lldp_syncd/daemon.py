@@ -153,22 +153,26 @@ class LldpSyncDaemon(SonicSyncDaemon):
         """
         cmd = ['/usr/sbin/lldpctl', '-f', 'json']
         logger.debug("Invoking lldpctl with: {}".format(cmd))
+        cmd_local = ['/usr/sbin/lldpcli', '-f', 'json', 'show', 'chassis']
+        logger.debug("Invoking lldpcli with: {}".format(cmd_local))
 
-        try:
-            # execute the subprocess command
-            lldpctl_output = subprocess.check_output(cmd)
-        except subprocess.CalledProcessError:
-            logger.exception("lldpctl exited with non-zero status")
-            return None
-
-        try:
-            # parse the scrapped output
-            lldpctl_json = json.loads(lldpctl_output)
-        except ValueError:
-            logger.exception("Failed to parse lldpctl output")
-            return None
-        else:
+        def scrap_output(cmd):
+            try:
+                # execute the subprocess command
+                lldpctl_output = subprocess.check_output(cmd)
+                lldpctl_json = json.loads(lldpctl_output)
+            except subprocess.CalledProcessError:
+                 logger.exception("lldpctl exited with non-zero status")
+                 return {}
+            except ValueError:
+                logger.exception("Failed to parse lldpctl output")
+                return {}
             return lldpctl_json
+
+        lldp_json = scrap_output(cmd)
+        lldp_json['lldp_loc_chassis'] = scrap_output(cmd_local)
+
+        return lldp_json
 
     def parse_update(self, lldp_json):
         """
@@ -206,9 +210,13 @@ class LldpSyncDaemon(SonicSyncDaemon):
                     if_attributes = interface_list[if_name]
 
                 if 'port' in if_attributes:
-                    parsed_interfaces[if_name].update(self.parse_port(if_attributes['port']))
+                    rem_port_keys = ('lldp_rem_port_id_subtype', 'lldp_rem_port_id', 'lldp_rem_port_desc')
+                    parsed_interfaces[if_name].update(zip(rem_port_keys, self.parse_port(if_attributes['port'])))
                 if 'chassis' in if_attributes:
-                    parsed_interfaces[if_name].update(self.parse_chassis(if_attributes['chassis']))
+                    rem_chassis_keys = ('lldp_rem_chassis_id_subtype', 'lldp_rem_chassis_id',
+                                        'lldp_rem_sys_name', 'lldp_rem_sys_desc')
+                    parsed_interfaces[if_name].update(zip(rem_chassis_keys,
+                                                          self.parse_chassis(if_attributes['chassis'])))
 
                 # lldpRemTimeMark           TimeFilter,
                 parsed_interfaces[if_name].update({'lldp_rem_time_mark': str(parse_time(if_attributes.get('age')))})
@@ -223,6 +231,13 @@ class LldpSyncDaemon(SonicSyncDaemon):
                 # lldpSysCapEnabled
                 parsed_interfaces[if_name].update({'lldp_rem_sys_cap_enabled':
                                                    self.parse_sys_capabilities(capability_list, enabled=True)})
+                if lldp_json['lldp_loc_chassis']:
+                    loc_chassis_keys = ('lldp_loc_chassis_id_subtype', 'lldp_loc_chassis_id',
+                                        'lldp_loc_sys_name', 'lldp_loc_sys_desc')
+
+                    parsed_interfaces['local-chassis'].update(zip(loc_chassis_keys,
+                                                              self.parse_chassis(lldp_json['lldp_loc_chassis']
+                                                                                 ['local-chassis']['chassis'])))
 
             return parsed_interfaces
         except (KeyError, ValueError):
@@ -238,16 +253,11 @@ class LldpSyncDaemon(SonicSyncDaemon):
             logger.exception("Could not infer system information from: {}".format(chassis_attributes))
             chassis_id_subtype = chassis_id = rem_name = rem_desc = None
 
-        return {
-            # lldpRemChassisIdSubtype   LldpChassisIdSubtype,
-            'lldp_rem_chassis_id_subtype': chassis_id_subtype,
-            # lldpRemChassisId          LldpChassisId,
-            'lldp_rem_chassis_id': chassis_id,
-            # lldpRemSysName            SnmpAdminString,
-            'lldp_rem_sys_name': rem_name,
-            # lldpRemSysDesc            SnmpAdminString,
-            'lldp_rem_sys_desc': rem_desc,
-        }
+        return (chassis_id_subtype,
+                chassis_id,
+                rem_name,
+                rem_desc,
+                )
 
     def parse_port(self, port_attributes):
         port_identifiers = port_attributes.get('id')
@@ -259,14 +269,10 @@ class LldpSyncDaemon(SonicSyncDaemon):
             logger.exception("Could not infer chassis subtype from: {}".format(port_attributes))
             subtype, value = None
 
-        return {
-            # lldpRemPortIdSubtype      LldpPortIdSubtype,
-            'lldp_rem_port_id_subtype': subtype,
-            # lldpRemPortId             LldpPortId,
-            'lldp_rem_port_id': value,
-            # lldpRemSysDesc            SnmpAdminString,
-            'lldp_rem_port_desc': port_attributes.get('descr')
-        }
+        return (subtype,
+                value,
+                port_attributes.get('descr'),
+                )
 
     def sync(self, parsed_update):
         """
@@ -278,7 +284,12 @@ class LldpSyncDaemon(SonicSyncDaemon):
         client = self.db_connector.redis_clients[self.db_connector.APPL_DB]
         pattern = '{}:*'.format(LldpSyncDaemon.LLDP_ENTRY_TABLE)
         self.db_connector.delete_all_by_pattern(self.db_connector.APPL_DB, pattern)
-
+        # push local chassis data to APP DB
+        for k, v in parsed_update['local-chassis'].items():
+            self.db_connector.set(self.db_connector.APPL_DB, "LLDP_LOC_CHASSIS", k, v, blocking=True)
+        logger.debug("sync'd: {}".format(json.dumps(parsed_update['local-chassis'], indent=3)))
+        # leave only interfaces in parsed_update
+        parsed_update.pop('local-chassis')
         # Repopulate LLDP_ENTRY_TABLE by adding all elements from parsed_update
         for interface, if_attributes in parsed_update.items():
 
