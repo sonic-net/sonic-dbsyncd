@@ -96,16 +96,16 @@ class TestLldpSyncDaemonDBSync(TestCase):
         with mock.patch.object(lldp_syncd.DBSyncDaemon, "__init__", lambda _: None):
             self.daemon = lldp_syncd.DBSyncDaemon()
             self.daemon.port_table = {"Ethernet0":
-                {'description': "Hedgehog", "speed":50000},
+                {'description': "Hedgehog", "speed": 50000},
                 "Ethernet4":
-                {'description': "Red door'", "speed":50000}}
+                {'description': "Red door'", "speed": 50000}}
 
     def test_port_handler_descr(self):
         """
         test handling update of description of port
         """
         with mock.patch.object(lldp_syncd.DBSyncDaemon, "run_command", mock.Mock()):
-            self.daemon.port_handler("Ethernet4", {"description": "black door", "speed":50000})
+            self.daemon.port_handler("Ethernet4", {"description": "black door", "speed": 50000})
             self.daemon.run_command.assert_called_once_with(
                 "lldpcli configure lldp portidsubtype local Ethernet4 description 'black door'")
 
@@ -122,6 +122,6 @@ class TestLldpSyncDaemonDBSync(TestCase):
         test handling update when description field is removed
         """
         with mock.patch.object(lldp_syncd.DBSyncDaemon, "run_command", mock.Mock()):
-            self.daemon.port_handler("Ethernet4", {"speed":50000})
+            self.daemon.port_handler("Ethernet4", {"speed": 50000})
             self.daemon.run_command.assert_called_once_with(
-                "lldpcli configure lldp portidsubtype local Ethernet4 description ''")
+                "lldpcli configure lldp portidsubtype local Ethernet4 description ' '")

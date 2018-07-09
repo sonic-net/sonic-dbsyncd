@@ -23,8 +23,8 @@ class DBSyncDaemon(SonicSyncDaemon):
         stdout = p.communicate()[0]
         p.wait()
         if p.returncode != 0:
-            logger.error('[lldp dbsyncd] command execution returned {}. \
-            Command: "{}", stdout: "{}"'.format(p.returncode, command, stdout))
+            logger.error("[lldp dbsyncd] command execution returned {}. "
+                         "Command: '{}', stdout: '{}'".format(p.returncode, command, stdout))
 
     def port_handler(self, key, data):
         """
@@ -32,11 +32,11 @@ class DBSyncDaemon(SonicSyncDaemon):
         """
         # we're interested only in description for now
         if self.port_table[key].get("description") != data.get("description"):
-            new_descr = data.get("description", "")
+            new_descr = data.get("description", " ")
             logger.info("[lldp dbsyncd] Port {} description changed to {}."
                         .format(key, new_descr))
-            self.run_command("lldpcli configure lldp portidsubtype local {} \
-                              description '{}'".format(key, new_descr))
+            self.run_command("lldpcli configure lldp portidsubtype local {} description '{}'"
+                             .format(key, new_descr))
         # update local cache
         self.port_table[key] = data
 
@@ -44,9 +44,8 @@ class DBSyncDaemon(SonicSyncDaemon):
         self.port_table = self.config_db.get_table('PORT')
         # supply LLDP_LOC_ENTRY_TABLE and lldpd with correct values on start
         for port_name, attributes in self.port_table.items():
-            self.run_command("lldpcli configure lldp portidsubtype local \
-                {} description '{}'".format(
-                port_name, attributes.get("description", " ")))
+            self.run_command("lldpcli configure lldp portidsubtype local {} description '{}'"
+                             .format(port_name, attributes.get("description", " ")))
 
         # subscribe for further changes
         self.config_db.subscribe('PORT', lambda table, key, data:
