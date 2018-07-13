@@ -188,13 +188,20 @@ class LldpSyncDaemon(SonicSyncDaemon):
 
     def parse_chassis(self, chassis_attributes):
         try:
-            (rem_name, rem_attributes), = chassis_attributes.items()
-            chassis_id_subtype = str(self.ChassisIdSubtypeMap[rem_attributes['id']['type']].value)
-            chassis_id = rem_attributes['id']['value']
+            if 'id' in chassis_attributes and 'id' not in chassis_attributes['id']:
+                sys_name = ''
+                rem_attributes = chassis_attributes
+                id_attributes = chassis_attributes['id']
+            else:
+                (sys_name, rem_attributes) = chassis_attributes.items()[0]
+                id_attributes = rem_attributes.get('id', '')
+
+            chassis_id_subtype = str(self.ChassisIdSubtypeMap[id_attributes['type']].value)
+            chassis_id = id_attributes.get('value', '')
             rem_desc = rem_attributes.get('descr', '')
         except (KeyError, ValueError):
             logger.exception("Could not infer system information from: {}".format(chassis_attributes))
-            chassis_id_subtype = chassis_id = rem_name = rem_desc = None
+            chassis_id_subtype = chassis_id = sys_name = rem_desc = ''
 
         return {
             # lldpRemChassisIdSubtype   LldpChassisIdSubtype,
@@ -202,7 +209,7 @@ class LldpSyncDaemon(SonicSyncDaemon):
             # lldpRemChassisId          LldpChassisId,
             'lldp_rem_chassis_id': chassis_id,
             # lldpRemSysName            SnmpAdminString,
-            'lldp_rem_sys_name': rem_name,
+            'lldp_rem_sys_name': sys_name,
             # lldpRemSysDesc            SnmpAdminString,
             'lldp_rem_sys_desc': rem_desc,
         }

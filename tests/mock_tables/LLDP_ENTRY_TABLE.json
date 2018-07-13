@@ -62,11 +62,11 @@
   "LLDP_ENTRY_TABLE:Ethernet96": {
     "lldp_rem_port_id_subtype": 5,
     "lldp_rem_chassis_id": "00:11:22:33:44:55",
-    "lldp_rem_sys_desc": "I'm a little teapot.",
+    "lldp_rem_sys_desc": "",
     "lldp_rem_time_mark": 18543,
     "lldp_rem_port_desc": "",
     "lldp_rem_chassis_id_subtype": 4,
-    "lldp_rem_sys_name": "switch13",
+    "lldp_rem_sys_name": "",
     "lldp_rem_port_id": "Ethernet25"
   },
   "LLDP_ENTRY_TABLE:Ethernet92": {
