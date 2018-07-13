@@ -188,16 +188,16 @@ class LldpSyncDaemon(SonicSyncDaemon):
 
     def parse_chassis(self, chassis_attributes):
         try:
-            (rem_name, rem_attributes) = chassis_attributes.items()[0]
-            if rem_name == 'id':
+            if 'id' in chassis_attributes and 'id' not in chassis_attributes['id']:
                 sys_name = ''
-                id_attributes = rem_attributes
+                rem_attributes = chassis_attributes
+                id_attributes = chassis_attributes['id']
             else:
-                sys_name = rem_name
-                id_attributes = rem_attributes['id']
+                (sys_name, rem_attributes) = chassis_attributes.items()[0]
+                id_attributes = rem_attributes.get('id', '')
 
             chassis_id_subtype = str(self.ChassisIdSubtypeMap[id_attributes['type']].value)
-            chassis_id = id_attributes['value']
+            chassis_id = id_attributes.get('value', '')
             rem_desc = rem_attributes.get('descr', '')
         except (KeyError, ValueError):
             logger.exception("Could not infer system information from: {}".format(chassis_attributes))
