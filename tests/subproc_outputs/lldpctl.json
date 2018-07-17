@@ -1,4 +1,40 @@
 {
+  "lldp_loc_chassis":{
+    "local-chassis": {
+      "chassis": {
+        "arc-switch1025": {
+          "mgmt-ip": [
+            "10.1.0.32",
+            "fc00:1::32"
+          ],
+          "id": {
+            "type": "mac",
+            "value": "7c:fe:90:63:f4:66"
+          },
+          "capability": [
+            {
+              "type": "Bridge",
+              "enabled": true
+            },
+            {
+              "type": "Router",
+              "enabled": true
+            },
+            {
+              "type": "Wlan",
+              "enabled": false
+            },
+            {
+              "type": "Station",
+              "enabled": false
+            }
+          ],
+          "descr": "Debian GNU/Linux 8 (jessie) Linux 3.16.0-5-amd64 #1 SMP Debian 3.16.51-3+deb8u1 (2018-01-08) x86_64",
+          "ttl": "120"
+        }
+      }
+    }
+  },
   "lldp": {
     "interface": [
       {
@@ -1313,25 +1349,11 @@
           },
           "via": "LLDP",
           "chassis": {
-            "switch13": {
-              "mgmt-ip": "10.3.147.196",
-              "id": {
-                "type": "mac",
-                "value": "00:11:22:33:44:55"
-              },
-              "ttl": "120",
-              "descr": "I'm a little teapot.",
-              "capability": [
-                {
-                  "type": "Bridge",
-                  "enabled": true
-                },
-                {
-                  "type": "Router",
-                  "enabled": true
-                }
-              ]
-            }
+            "id": {
+              "type": "mac",
+              "value": "00:11:22:33:44:55"
+            },
+            "ttl": "120"
           },
           "age": "0 day, 05:09:03",
           "vlan": {
