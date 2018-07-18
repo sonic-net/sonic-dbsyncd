@@ -79,8 +79,8 @@
   },
   "LLDP_ENTRY_TABLE:Ethernet96": {
     "lldp_rem_index": 1,
-    "lldp_rem_sys_cap_enabled": null,
-    "lldp_rem_sys_cap_supported": null,
+    "lldp_rem_sys_cap_enabled": "",
+    "lldp_rem_sys_cap_supported": "",
     "lldp_rem_port_id_subtype": 5,
     "lldp_rem_chassis_id": "00:11:22:33:44:55",
     "lldp_rem_sys_desc": "",

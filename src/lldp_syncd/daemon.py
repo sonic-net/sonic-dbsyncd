@@ -20,6 +20,22 @@ SONIC_ETHERNET_RE_PATTERN = r'^(Ethernet(\d+)|eth0)$'
 LLDPD_UPTIME_RE_SPLIT_PATTERN = r' days?, '
 MANAGEMENT_PORT_NAME = 'eth0'
 
+def _scrap_output(cmd):
+    try:
+        # execute the subprocess command
+        lldpctl_output = subprocess.check_output(cmd)
+    except subprocess.CalledProcessError:
+        logger.exception("lldpctl exited with non-zero status")
+        return None
+
+    try:
+        # parse the scrapped output
+        lldpctl_json = json.loads(lldpctl_output)
+    except ValueError:
+        logger.exception("Failed to parse lldpctl output")
+        return None
+
+    return lldpctl_json
 
 def parse_time(time_str):
     """
@@ -125,7 +141,7 @@ class LldpSyncDaemon(SonicSyncDaemon):
                 capability_list = [capability_list]
         except KeyError:
             logger.error("Failed to get system capabilities")
-            return None
+            return []
         return capability_list
 
     def parse_sys_capabilities(self, capability_list, enabled=False):
@@ -135,10 +151,9 @@ class LldpSyncDaemon(SonicSyncDaemon):
         :param enabled: if true, consider only the enabled capabilities
         :return: string representing a bit map
         """
-        # if chassis is incomplete, missing capabilities
-        # TODO check if it does not break snmpagent
+        # chassis is incomplete, missing capabilities
         if not capability_list:
-            return None
+            return ""
 
         sys_cap = 0x00
         for capability in capability_list:
@@ -167,25 +182,8 @@ class LldpSyncDaemon(SonicSyncDaemon):
         cmd_local = ['/usr/sbin/lldpcli', '-f', 'json', 'show', 'chassis']
         logger.debug("Invoking lldpcli with: {}".format(cmd_local))
 
-        def scrap_output(cmd):
-            try:
-                # execute the subprocess command
-                lldpctl_output = subprocess.check_output(cmd)
-            except subprocess.CalledProcessError:
-                logger.exception("lldpctl exited with non-zero status")
-                return None
-
-            try:
-                # parse the scrapped output
-                lldpctl_json = json.loads(lldpctl_output)
-            except ValueError:
-                logger.exception("Failed to parse lldpctl output")
-                return None
-
-            return lldpctl_json
-
-        lldp_json = scrap_output(cmd)
-        lldp_json['lldp_loc_chassis'] = scrap_output(cmd_local)
+        lldp_json = _scrap_output(cmd)
+        lldp_json['lldp_loc_chassis'] = _scrap_output(cmd_local)
 
         return lldp_json
 
@@ -316,8 +314,8 @@ class LldpSyncDaemon(SonicSyncDaemon):
         :return: new, changed, deleted keys tuple
         """
         new_keys = [key for key in update.keys() if key not in cache.keys()]
-        changed_keys = list(set([key for key in update.keys() + cache.keys()
-                            if update[key] != cache.get(key)]))
+        changed_keys = list(set(key for key in update.keys() + cache.keys()
+                            if update[key] != cache.get(key)))
         deleted_keys = [key for key in cache.keys() if key not in update.keys()]
         return new_keys, changed_keys, deleted_keys
 
