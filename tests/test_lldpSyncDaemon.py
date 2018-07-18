@@ -9,11 +9,13 @@ sys.path.insert(0, os.path.join(modules_path, 'src'))
 
 from unittest import TestCase
 import json
+import mock
 import re
 import lldp_syncd
 import lldp_syncd.conventions
 import lldp_syncd.daemon
-from swsssdk import SonicV2Connector
+import lldp_syncd.dbsyncd
+from swsssdk import SonicV2Connector, ConfigDBConnector
 
 INPUT_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'subproc_outputs')
 
@@ -86,3 +88,40 @@ class TestLldpSyncDaemon(TestCase):
     def test_timeparse(self):
         self.assertEquals(lldp_syncd.daemon.parse_time("0 day, 05:09:02"), make_seconds(0, 5, 9, 2))
         self.assertEquals(lldp_syncd.daemon.parse_time("2 days, 05:59:02"), make_seconds(2, 5, 59, 2))
+
+
+class TestLldpSyncDaemonDBSync(TestCase):
+    
+    def setUp(self):
+        with mock.patch.object(lldp_syncd.DBSyncDaemon, "__init__", lambda _: None):
+            self.daemon = lldp_syncd.DBSyncDaemon()
+            self.daemon.port_table = {"Ethernet0":
+                {'description': "Hedgehog", "speed": 50000},
+                "Ethernet4":
+                {'description': "Red door'", "speed": 50000}}
+
+    def test_port_handler_descr(self):
+        """
+        test handling update of description of port
+        """
+        with mock.patch.object(lldp_syncd.DBSyncDaemon, "run_command", mock.Mock()):
+            self.daemon.port_handler("Ethernet4", {"description": "black door", "speed": 50000})
+            self.daemon.run_command.assert_called_once_with(
+                "lldpcli configure lldp portidsubtype local Ethernet4 description 'black door'")
+
+    def test_port_handler_speed(self):
+        """
+        test updating port speed(no action expected)
+        """
+        with mock.patch.object(lldp_syncd.DBSyncDaemon, "run_command", mock.Mock()):
+            self.daemon.port_handler("Ethernet0", {"speed": 100000, "description": "Hedgehog"})
+            self.daemon.run_command.assert_not_called()
+
+    def test_port_handler_delete_descr(self):
+        """
+        test handling update when description field is removed
+        """
+        with mock.patch.object(lldp_syncd.DBSyncDaemon, "run_command", mock.Mock()):
+            self.daemon.port_handler("Ethernet4", {"speed": 50000})
+            self.daemon.run_command.assert_called_once_with(
+                "lldpcli configure lldp portidsubtype local Ethernet4 description ' '")

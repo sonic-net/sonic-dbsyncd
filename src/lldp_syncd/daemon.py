@@ -10,7 +10,7 @@ from swsssdk import SonicV2Connector
 
 from sonic_syncd import SonicSyncDaemon
 from . import logger
-from .conventions import LldpPortIdSubtype, LldpChassisIdSubtype
+from .conventions import LldpPortIdSubtype, LldpChassisIdSubtype, LldpSystemCapabilitiesMap
 
 LLDPD_TIME_FORMAT = '%H:%M:%S'
 
@@ -44,7 +44,8 @@ def parse_time(time_str):
     """
     days, hour_min_secs = re.split(LLDPD_UPTIME_RE_SPLIT_PATTERN, time_str)
     struct_time = time.strptime(hour_min_secs, LLDPD_TIME_FORMAT)
-    time_delta = datetime.timedelta(days=int(days), hours=struct_time.tm_hour, minutes=struct_time.tm_min,
+    time_delta = datetime.timedelta(days=int(days), hours=struct_time.tm_hour,
+                                    minutes=struct_time.tm_min,
                                     seconds=struct_time.tm_sec)
     return int(time_delta.total_seconds())
 
@@ -56,6 +57,7 @@ class LldpSyncDaemon(SonicSyncDaemon):
     within the same Redis instance on a switch
     """
     LLDP_ENTRY_TABLE = 'LLDP_ENTRY_TABLE'
+    LLDP_LOC_CHASSIS_TABLE = 'LLDP_LOC_CHASSIS'
 
     @unique
     class PortIdSubtypeMap(int, Enum):
@@ -109,19 +111,54 @@ class LldpSyncDaemon(SonicSyncDaemon):
         # chassis = int(LldpChassisIdSubtype.chassisComponent) # (unsupported by lldpd)
         local = int(LldpPortIdSubtype.local)
 
+    def get_sys_capability_list(self, if_attributes):
+        """
+        Get a list of capabilities from interface attributes dictionary.
+        :param if_attributes: interface attributes
+        :return: list of capabilities
+        """
+        try:
+            # [{'enabled': ..., 'type': 'capability1'}, {'enabled': ..., 'type': 'capability2'}]
+            capability_list = if_attributes['chassis'].values()[0]['capability']
+            # {'enabled': ..., 'type': 'capability'}
+            if isinstance(capability_list, dict):
+                capability_list = [capability_list]
+        except KeyError:
+            logger.error("Failed to get system capabilities")
+            return []
+        return capability_list
+
+    def parse_sys_capabilities(self, capability_list, enabled=False):
+        """
+        Get a bit map of capabilities, accoding to textual convention.
+        :param capability_list: list of capabilities
+        :param enabled: if true, consider only the enabled capabilities
+        :return: string representing a bit map
+        """
+        # chassis is incomplete, missing capabilities
+        if not capability_list:
+            return ""
+
+        sys_cap = 0x00
+        for capability in capability_list:
+            try:
+                if (not enabled) or capability["enabled"]:
+                    sys_cap |= 128 >> LldpSystemCapabilitiesMap[capability["type"].lower()]
+            except KeyError:
+                logger.warning("Unknown capability {}".format(capability["type"]))
+        return "%0.2X 00" % sys_cap
+
     def __init__(self, update_interval=None):
         super(LldpSyncDaemon, self).__init__()
         self._update_interval = update_interval or DEFAULT_UPDATE_INTERVAL
         self.db_connector = SonicV2Connector()
         self.db_connector.connect(self.db_connector.APPL_DB)
 
-    def source_update(self):
-        """
-        Invoke lldpctl and format as JSON
-        """
-        cmd = ['/usr/sbin/lldpctl', '-f', 'json']
-        logger.debug("Invoking lldpctl with: {}".format(cmd))
+        self.chassis_cache = {}
+        self.interfaces_cache = {}
 
+    @staticmethod
+    def _scrap_output(cmd):
         try:
             # execute the subprocess command
             lldpctl_output = subprocess.check_output(cmd)
@@ -135,8 +172,22 @@ class LldpSyncDaemon(SonicSyncDaemon):
         except ValueError:
             logger.exception("Failed to parse lldpctl output")
             return None
-        else:
-            return lldpctl_json
+
+        return lldpctl_json
+
+    def source_update(self):
+        """
+        Invoke lldpctl and format as JSON
+        """
+        cmd = ['/usr/sbin/lldpctl', '-f', 'json']
+        logger.debug("Invoking lldpctl with: {}".format(cmd))
+        cmd_local = ['/usr/sbin/lldpcli', '-f', 'json', 'show', 'chassis']
+        logger.debug("Invoking lldpcli with: {}".format(cmd_local))
+
+        lldp_json = self._scrap_output(cmd)
+        lldp_json['lldp_loc_chassis'] = self._scrap_output(cmd_local)
+
+        return lldp_json
 
     def parse_update(self, lldp_json):
         """
@@ -148,8 +199,8 @@ class LldpSyncDaemon(SonicSyncDaemon):
 
         LldpRemEntry ::= SEQUENCE {
               lldpRemTimeMark           TimeFilter,
-              *lldpRemLocalPortNum       LldpPortNumber,
-              *lldpRemIndex              Integer32,
+              lldpRemLocalPortNum       LldpPortNumber,
+              lldpRemIndex              Integer32,
               lldpRemChassisIdSubtype   LldpChassisIdSubtype,
               lldpRemChassisId          LldpChassisId,
               lldpRemPortIdSubtype      LldpPortIdSubtype,
@@ -157,11 +208,10 @@ class LldpSyncDaemon(SonicSyncDaemon):
               lldpRemPortDesc           SnmpAdminString,
               lldpRemSysName            SnmpAdminString,
               lldpRemSysDesc            SnmpAdminString,
-              *lldpRemSysCapSupported    LldpSystemCapabilitiesMap,
-              *lldpRemSysCapEnabled      LldpSystemCapabilitiesMap
+              lldpRemSysCapSupported    LldpSystemCapabilitiesMap,
+              lldpRemSysCapEnabled      LldpSystemCapabilitiesMap
         }
         """
-        # TODO: *Implement
         try:
             interface_list = lldp_json['lldp'].get('interface') or []
             parsed_interfaces = defaultdict(dict)
@@ -175,12 +225,45 @@ class LldpSyncDaemon(SonicSyncDaemon):
                     if_attributes = interface_list[if_name]
 
                 if 'port' in if_attributes:
-                    parsed_interfaces[if_name].update(self.parse_port(if_attributes['port']))
+                    rem_port_keys = ('lldp_rem_port_id_subtype',
+                                     'lldp_rem_port_id',
+                                     'lldp_rem_port_desc')
+                    parsed_port = zip(rem_port_keys, self.parse_port(if_attributes['port']))
+                    parsed_interfaces[if_name].update(parsed_port)
+
                 if 'chassis' in if_attributes:
-                    parsed_interfaces[if_name].update(self.parse_chassis(if_attributes['chassis']))
+                    rem_chassis_keys = ('lldp_rem_chassis_id_subtype',
+                                        'lldp_rem_chassis_id',
+                                        'lldp_rem_sys_name',
+                                        'lldp_rem_sys_desc')
+                    parsed_chassis = zip(rem_chassis_keys,
+                                         self.parse_chassis(if_attributes['chassis']))
+                    parsed_interfaces[if_name].update(parsed_chassis)
 
                 # lldpRemTimeMark           TimeFilter,
-                parsed_interfaces[if_name].update({'lldp_rem_time_mark': str(parse_time(if_attributes.get('age')))})
+                parsed_interfaces[if_name].update({'lldp_rem_time_mark':
+                                                   str(parse_time(if_attributes.get('age')))})
+
+                # lldpRemIndex
+                parsed_interfaces[if_name].update({'lldp_rem_index': str(if_attributes.get('rid'))})
+
+                capability_list = self.get_sys_capability_list(if_attributes)
+                # lldpSysCapSupported
+                parsed_interfaces[if_name].update({'lldp_rem_sys_cap_supported':
+                                                    self.parse_sys_capabilities(capability_list)})
+                # lldpSysCapEnabled
+                parsed_interfaces[if_name].update({'lldp_rem_sys_cap_enabled':
+                                                   self.parse_sys_capabilities(
+                                                       capability_list, enabled=True)})
+                if lldp_json['lldp_loc_chassis']:
+                    loc_chassis_keys = ('lldp_loc_chassis_id_subtype',
+                                        'lldp_loc_chassis_id',
+                                        'lldp_loc_sys_name',
+                                        'lldp_loc_sys_desc')
+                    parsed_chassis = zip(loc_chassis_keys,
+                                         self.parse_chassis(lldp_json['lldp_loc_chassis']
+                                                            ['local-chassis']['chassis']))
+                    parsed_interfaces['local-chassis'].update(parsed_chassis)
 
             return parsed_interfaces
         except (KeyError, ValueError):
@@ -190,29 +273,25 @@ class LldpSyncDaemon(SonicSyncDaemon):
         try:
             if 'id' in chassis_attributes and 'id' not in chassis_attributes['id']:
                 sys_name = ''
-                rem_attributes = chassis_attributes
+                attributes = chassis_attributes
                 id_attributes = chassis_attributes['id']
             else:
-                (sys_name, rem_attributes) = chassis_attributes.items()[0]
-                id_attributes = rem_attributes.get('id', '')
+                (sys_name, attributes) = chassis_attributes.items()[0]
+                id_attributes = attributes.get('id', '')
 
             chassis_id_subtype = str(self.ChassisIdSubtypeMap[id_attributes['type']].value)
             chassis_id = id_attributes.get('value', '')
-            rem_desc = rem_attributes.get('descr', '')
+            descr = attributes.get('descr', '')
         except (KeyError, ValueError):
-            logger.exception("Could not infer system information from: {}".format(chassis_attributes))
-            chassis_id_subtype = chassis_id = sys_name = rem_desc = ''
+            logger.exception("Could not infer system information from: {}"
+                             .format(chassis_attributes))
+            chassis_id_subtype = chassis_id = sys_name = descr = ''
 
-        return {
-            # lldpRemChassisIdSubtype   LldpChassisIdSubtype,
-            'lldp_rem_chassis_id_subtype': chassis_id_subtype,
-            # lldpRemChassisId          LldpChassisId,
-            'lldp_rem_chassis_id': chassis_id,
-            # lldpRemSysName            SnmpAdminString,
-            'lldp_rem_sys_name': sys_name,
-            # lldpRemSysDesc            SnmpAdminString,
-            'lldp_rem_sys_desc': rem_desc,
-        }
+        return (chassis_id_subtype,
+                chassis_id,
+                sys_name,
+                descr,
+                )
 
     def parse_port(self, port_attributes):
         port_identifiers = port_attributes.get('id')
@@ -224,14 +303,23 @@ class LldpSyncDaemon(SonicSyncDaemon):
             logger.exception("Could not infer chassis subtype from: {}".format(port_attributes))
             subtype, value = None
 
-        return {
-            # lldpRemPortIdSubtype      LldpPortIdSubtype,
-            'lldp_rem_port_id_subtype': subtype,
-            # lldpRemPortId             LldpPortId,
-            'lldp_rem_port_id': value,
-            # lldpRemSysDesc            SnmpAdminString,
-            'lldp_rem_port_desc': port_attributes.get('descr', '')
-        }
+        return (subtype,
+                value,
+                port_attributes.get('descr', ''),
+                )
+
+    def cache_diff(self, cache, update):
+        """
+        Find difference in keys between update and local cache dicts
+        :param cache: Local cache dict
+        :param update: Update dict
+        :return: new, changed, deleted keys tuple
+        """
+        new_keys = [key for key in update.keys() if key not in cache.keys()]
+        changed_keys = list(set(key for key in update.keys() + cache.keys()
+                            if update[key] != cache.get(key)))
+        deleted_keys = [key for key in cache.keys() if key not in update.keys()]
+        return new_keys, changed_keys, deleted_keys
 
     def sync(self, parsed_update):
         """
@@ -239,18 +327,28 @@ class LldpSyncDaemon(SonicSyncDaemon):
         """
         logger.debug("Initiating LLDPd sync to Redis...")
 
-        # First, delete all entries from the LLDP_ENTRY_TABLE
-        client = self.db_connector.redis_clients[self.db_connector.APPL_DB]
-        pattern = '{}:*'.format(LldpSyncDaemon.LLDP_ENTRY_TABLE)
-        self.db_connector.delete_all_by_pattern(self.db_connector.APPL_DB, pattern)
+        # push local chassis data to APP DB
+        chassis_update = parsed_update.pop('local-chassis')
+        if chassis_update != self.chassis_cache:
+            self.db_connector.delete(self.db_connector.APPL_DB,
+                                     LldpSyncDaemon.LLDP_LOC_CHASSIS_TABLE)
+            for k, v in chassis_update.items():
+                self.db_connector.set(self.db_connector.APPL_DB,
+                                      LldpSyncDaemon.LLDP_LOC_CHASSIS_TABLE, k, v, blocking=True)
+            logger.debug("sync'd: {}".format(json.dumps(chassis_update, indent=3)))
 
-        # Repopulate LLDP_ENTRY_TABLE by adding all elements from parsed_update
-        for interface, if_attributes in parsed_update.items():
+        new, changed, deleted = self.cache_diff(self.interfaces_cache, parsed_update)
+        # Delete LLDP_ENTRIES which were modified or are missing
+        for interface in changed + deleted:
+            table_key = ':'.join([LldpSyncDaemon.LLDP_ENTRY_TABLE, interface])
+            self.db_connector.delete(self.db_connector.APPL_DB, table_key)
+        # Repopulate LLDP_ENTRY_TABLE by adding all changed elements
+        for interface in changed + new:
             if re.match(SONIC_ETHERNET_RE_PATTERN, interface) is None:
                 logger.warning("Ignoring interface '{}'".format(interface))
                 continue
-            for k, v in if_attributes.items():
-                # port_table_key = LLDP_ENTRY_TABLE:INTERFACE_NAME;
-                table_key = ':'.join([LldpSyncDaemon.LLDP_ENTRY_TABLE, interface])
+            # port_table_key = LLDP_ENTRY_TABLE:INTERFACE_NAME;
+            table_key = ':'.join([LldpSyncDaemon.LLDP_ENTRY_TABLE, interface])
+            for k, v in parsed_update[interface].items():
                 self.db_connector.set(self.db_connector.APPL_DB, table_key, k, v, blocking=True)
-            logger.debug("sync'd: \n{}".format(json.dumps(if_attributes, indent=3)))
+            logger.debug("sync'd: \n{}".format(json.dumps(parsed_update[interface], indent=3)))
