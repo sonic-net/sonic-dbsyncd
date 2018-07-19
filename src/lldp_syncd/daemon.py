@@ -235,7 +235,8 @@ class LldpSyncDaemon(SonicSyncDaemon):
                     rem_chassis_keys = ('lldp_rem_chassis_id_subtype',
                                         'lldp_rem_chassis_id',
                                         'lldp_rem_sys_name',
-                                        'lldp_rem_sys_desc')
+                                        'lldp_rem_sys_desc',
+                                        'lldp_rem_man_addr')
                     parsed_chassis = zip(rem_chassis_keys,
                                          self.parse_chassis(if_attributes['chassis']))
                     parsed_interfaces[if_name].update(parsed_chassis)
@@ -259,7 +260,8 @@ class LldpSyncDaemon(SonicSyncDaemon):
                     loc_chassis_keys = ('lldp_loc_chassis_id_subtype',
                                         'lldp_loc_chassis_id',
                                         'lldp_loc_sys_name',
-                                        'lldp_loc_sys_desc')
+                                        'lldp_loc_sys_desc',
+                                        'lldp_loc_man_addr')
                     parsed_chassis = zip(loc_chassis_keys,
                                          self.parse_chassis(lldp_json['lldp_loc_chassis']
                                                             ['local-chassis']['chassis']))
@@ -282,15 +284,17 @@ class LldpSyncDaemon(SonicSyncDaemon):
             chassis_id_subtype = str(self.ChassisIdSubtypeMap[id_attributes['type']].value)
             chassis_id = id_attributes.get('value', '')
             descr = attributes.get('descr', '')
+            mgmt_ip = attributes.get('mgmt-ip', '')
         except (KeyError, ValueError):
             logger.exception("Could not infer system information from: {}"
                              .format(chassis_attributes))
-            chassis_id_subtype = chassis_id = sys_name = descr = ''
+            chassis_id_subtype = chassis_id = sys_name = descr = mgmt_ip = ''
 
         return (chassis_id_subtype,
                 chassis_id,
                 sys_name,
                 descr,
+                mgmt_ip,
                 )
 
     def parse_port(self, port_attributes):
