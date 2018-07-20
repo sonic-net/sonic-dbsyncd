@@ -5,7 +5,8 @@ from swsssdk import ConfigDBConnector
 from sonic_syncd import SonicSyncDaemon
 from . import logger
 
-MGMT_INTERFACE_PATTERN = r"MGMT_INTERFACE*"
+PORT_TABLE_NAME = "PORT"
+MGMT_INTERFACE_TABLE_NAME = "MGMT_INTERFACE"
 IPV4_PATTERN = r'^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$'
 
 
@@ -21,7 +22,6 @@ class DBSyncDaemon(SonicSyncDaemon):
         self.config_db.connect()
         logger.info("[lldp dbsyncd] Connected to configdb")
         self.port_table = {}
-        self.man_addr = None
 
     def run_command(self, command):
         p = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE)
@@ -45,9 +45,9 @@ class DBSyncDaemon(SonicSyncDaemon):
         # update local cache
         self.port_table[key] = data
 
-    def man_addr_init(self):
+    def mgmt_addr_init(self):
 
-        man_table = self.config_db.get_table('MGMT_INTERFACE')
+        man_table = self.config_db.get_table(MGMT_INTERFACE_TABLE_NAME)
         # example table:
         # {('eth0', 'FC00:2::32/64'): {'forced_mgmt_routes': ['10.0.0.100/31'], 'gwaddr': 'fc00:2::fe'},
         # ('eth0', '10.224.23.69/24'): {'gwaddr': '10.224.23.254'}}
@@ -61,20 +61,19 @@ class DBSyncDaemon(SonicSyncDaemon):
             logger.error("No IPv4 management interface found")
 
     def port_table_init(self):
-        self.port_table = self.config_db.get_table('PORT')
+        self.port_table = self.config_db.get_table(PORT_TABLE_NAME)
         # supply LLDP_LOC_ENTRY_TABLE and lldpd with correct values on start
         for port_name, attributes in self.port_table.items():
             self.run_command("lldpcli configure lldp portidsubtype local {} description '{}'"
                              .format(port_name, attributes.get("description", " ")))
 
     def run(self):
-
         self.port_table_init()
-        # subscribe for further changes
-        self.config_db.subscribe('PORT', lambda table, key, data:
-                                 self.port_handler(key, data))
+        self.mgmt_addr_init()
 
-        self.man_addr_init()
+        # subscribe for further changes
+        self.config_db.subscribe(PORT_TABLE_NAME, lambda table, key, data:
+                                 self.port_handler(key, data))
 
         logger.info("[lldp dbsyncd] Subscribed to configdb PORT table")
         self.config_db.listen()

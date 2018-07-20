@@ -251,7 +251,7 @@ class LldpSyncDaemon(SonicSyncDaemon):
                 capability_list = self.get_sys_capability_list(if_attributes)
                 # lldpSysCapSupported
                 parsed_interfaces[if_name].update({'lldp_rem_sys_cap_supported':
-                                                    self.parse_sys_capabilities(capability_list)})
+                                                   self.parse_sys_capabilities(capability_list)})
                 # lldpSysCapEnabled
                 parsed_interfaces[if_name].update({'lldp_rem_sys_cap_enabled':
                                                    self.parse_sys_capabilities(
