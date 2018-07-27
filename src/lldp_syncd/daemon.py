@@ -16,9 +16,8 @@ LLDPD_TIME_FORMAT = '%H:%M:%S'
 
 DEFAULT_UPDATE_INTERVAL = 10
 
-SONIC_ETHERNET_RE_PATTERN = r'^(Ethernet(\d+)|eth0)$'
+SONIC_ETHERNET_RE_PATTERN = r'^Ethernet(\d+)$'
 LLDPD_UPTIME_RE_SPLIT_PATTERN = r' days?, '
-MANAGEMENT_PORT_NAME = 'eth0'
 
 
 def parse_time(time_str):
@@ -145,7 +144,7 @@ class LldpSyncDaemon(SonicSyncDaemon):
                 if (not enabled) or capability["enabled"]:
                     sys_cap |= 128 >> LldpSystemCapabilitiesMap[capability["type"].lower()]
             except KeyError:
-                logger.warning("Unknown capability {}".format(capability["type"]))
+                logger.debug("Unknown capability {}".format(capability["type"]))
         return "%0.2X 00" % sys_cap
 
     def __init__(self, update_interval=None):
@@ -359,7 +358,7 @@ class LldpSyncDaemon(SonicSyncDaemon):
         # Repopulate LLDP_ENTRY_TABLE by adding all changed elements
         for interface in changed + new:
             if re.match(SONIC_ETHERNET_RE_PATTERN, interface) is None:
-                logger.warning("Ignoring interface '{}'".format(interface))
+                logger.debug("Ignoring interface '{}'".format(interface))
                 continue
             # port_table_key = LLDP_ENTRY_TABLE:INTERFACE_NAME;
             table_key = ':'.join([LldpSyncDaemon.LLDP_ENTRY_TABLE, interface])
