@@ -16,7 +16,7 @@ LLDPD_TIME_FORMAT = '%H:%M:%S'
 
 DEFAULT_UPDATE_INTERVAL = 10
 
-SONIC_ETHERNET_RE_PATTERN = r'^Ethernet(\d+)$'
+SONIC_ETHERNET_RE_PATTERN = r'^(Ethernet(\d+)|eth0)$'
 LLDPD_UPTIME_RE_SPLIT_PATTERN = r' days?, '
 
 
@@ -358,7 +358,7 @@ class LldpSyncDaemon(SonicSyncDaemon):
         # Repopulate LLDP_ENTRY_TABLE by adding all changed elements
         for interface in changed + new:
             if re.match(SONIC_ETHERNET_RE_PATTERN, interface) is None:
-                logger.debug("Ignoring interface '{}'".format(interface))
+                logger.warning("Ignoring interface '{}'".format(interface))
                 continue
             # port_table_key = LLDP_ENTRY_TABLE:INTERFACE_NAME;
             table_key = ':'.join([LldpSyncDaemon.LLDP_ENTRY_TABLE, interface])
