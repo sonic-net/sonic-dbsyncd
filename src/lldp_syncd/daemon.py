@@ -18,7 +18,6 @@ DEFAULT_UPDATE_INTERVAL = 10
 
 SONIC_ETHERNET_RE_PATTERN = r'^(Ethernet(\d+)|eth0)$'
 LLDPD_UPTIME_RE_SPLIT_PATTERN = r' days?, '
-MANAGEMENT_PORT_NAME = 'eth0'
 
 
 def parse_time(time_str):
@@ -145,7 +144,7 @@ class LldpSyncDaemon(SonicSyncDaemon):
                 if (not enabled) or capability["enabled"]:
                     sys_cap |= 128 >> LldpSystemCapabilitiesMap[capability["type"].lower()]
             except KeyError:
-                logger.warning("Unknown capability {}".format(capability["type"]))
+                logger.debug("Unknown capability {}".format(capability["type"]))
         return "%0.2X 00" % sys_cap
 
     def __init__(self, update_interval=None):
@@ -235,7 +234,8 @@ class LldpSyncDaemon(SonicSyncDaemon):
                     rem_chassis_keys = ('lldp_rem_chassis_id_subtype',
                                         'lldp_rem_chassis_id',
                                         'lldp_rem_sys_name',
-                                        'lldp_rem_sys_desc')
+                                        'lldp_rem_sys_desc',
+                                        'lldp_rem_man_addr')
                     parsed_chassis = zip(rem_chassis_keys,
                                          self.parse_chassis(if_attributes['chassis']))
                     parsed_interfaces[if_name].update(parsed_chassis)
@@ -250,7 +250,7 @@ class LldpSyncDaemon(SonicSyncDaemon):
                 capability_list = self.get_sys_capability_list(if_attributes)
                 # lldpSysCapSupported
                 parsed_interfaces[if_name].update({'lldp_rem_sys_cap_supported':
-                                                    self.parse_sys_capabilities(capability_list)})
+                                                   self.parse_sys_capabilities(capability_list)})
                 # lldpSysCapEnabled
                 parsed_interfaces[if_name].update({'lldp_rem_sys_cap_enabled':
                                                    self.parse_sys_capabilities(
@@ -259,10 +259,21 @@ class LldpSyncDaemon(SonicSyncDaemon):
                     loc_chassis_keys = ('lldp_loc_chassis_id_subtype',
                                         'lldp_loc_chassis_id',
                                         'lldp_loc_sys_name',
-                                        'lldp_loc_sys_desc')
-                    parsed_chassis = zip(loc_chassis_keys,
+                                        'lldp_loc_sys_desc',
+                                        'lldp_loc_man_addr')
+                    parsed_chassis = dict(zip(loc_chassis_keys,
                                          self.parse_chassis(lldp_json['lldp_loc_chassis']
-                                                            ['local-chassis']['chassis']))
+                                                            ['local-chassis']['chassis'])))
+
+                    loc_capabilities = self.get_sys_capability_list(lldp_json['lldp_loc_chassis']
+                                                                    ['local-chassis'])
+                    # lldpLocSysCapSupported
+                    parsed_chassis.update({'lldp_loc_sys_cap_supported':
+                                          self.parse_sys_capabilities(loc_capabilities)})
+                    # lldpLocSysCapEnabled
+                    parsed_chassis.update({'lldp_loc_sys_cap_enabled':
+                                          self.parse_sys_capabilities(loc_capabilities, enabled=True)})
+
                     parsed_interfaces['local-chassis'].update(parsed_chassis)
 
             return parsed_interfaces
@@ -282,15 +293,17 @@ class LldpSyncDaemon(SonicSyncDaemon):
             chassis_id_subtype = str(self.ChassisIdSubtypeMap[id_attributes['type']].value)
             chassis_id = id_attributes.get('value', '')
             descr = attributes.get('descr', '')
+            mgmt_ip = attributes.get('mgmt-ip', '')
         except (KeyError, ValueError):
             logger.exception("Could not infer system information from: {}"
                              .format(chassis_attributes))
-            chassis_id_subtype = chassis_id = sys_name = descr = ''
+            chassis_id_subtype = chassis_id = sys_name = descr = mgmt_ip = ''
 
         return (chassis_id_subtype,
                 chassis_id,
                 sys_name,
                 descr,
+                mgmt_ip,
                 )
 
     def parse_port(self, port_attributes):
