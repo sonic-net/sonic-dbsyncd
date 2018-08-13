@@ -1,0 +1,38 @@
+{
+  "MGMT_INTERFACE|eth0|10.210.25.41/22": {
+      "gwaddr": "10.210.24.1"
+    },
+  "MGMT_INTERFACE|eth0|FC00:2::32/64": {
+    "forced_mgmt_routes": [
+      "10.0.0.100/31",
+      "10.250.0.8",
+      "10.255.0.0/28",
+      "10.210.25.0/24"
+    ],
+    "gwaddr": "fc00:2::1"
+  },
+  "PORT|Ethernet0": {
+    "alias": "Ethernet0",
+    "lanes": "0,1,2,3",
+    "speed": "40000",
+    "description": "hedgehog"
+  },
+  "PORT|Ethernet4": {
+    "alias": "Ethernet4",
+    "lanes": "4,5,6,7",
+    "speed": "40000",
+    "description": "hedgehog1"
+  },
+  "PORT|Ethernet8": {
+    "alias": "Ethernet8",
+    "lanes": "8,9,10,11",
+    "speed": "40000",
+    "description": "hedgehog2"
+  },
+  "PORT|Ethernet12": {
+    "alias": "Ethernet12",
+    "lanes": "12,13,14,15",
+    "speed": "40000",
+    "description": "hedgehog3"
+  }
+}
