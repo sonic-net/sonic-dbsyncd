@@ -104,7 +104,7 @@ class TestLldpSyncDaemonDBSync(TestCase):
         with mock.patch.object(lldp_syncd.DBSyncDaemon, "run_command", mock.Mock()):
             self.daemon.port_handler("Ethernet4", {"description": "black door", "speed": '50000'})
             self.daemon.run_command.assert_called_once_with(
-                "lldpcli configure lldp portidsubtype local Ethernet4 description 'black door'")
+                "lldpcli configure ports Ethernet4 lldp portidsubtype local Ethernet4 description 'black door'")
 
     def test_port_handler_speed(self):
         """
@@ -121,7 +121,7 @@ class TestLldpSyncDaemonDBSync(TestCase):
         with mock.patch.object(lldp_syncd.DBSyncDaemon, "run_command", mock.Mock()):
             self.daemon.port_handler("Ethernet4", {"speed": '50000'})
             self.daemon.run_command.assert_called_once_with(
-                "lldpcli configure lldp portidsubtype local Ethernet4 description ' '")
+               "lldpcli configure ports Ethernet4 lldp portidsubtype local Ethernet4 description ' '") 
 
     def test_man_addr_init(self):
 

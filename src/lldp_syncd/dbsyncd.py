@@ -40,7 +40,7 @@ class DBSyncDaemon(SonicSyncDaemon):
             new_descr = data.get("description", " ")
             logger.info("[lldp dbsyncd] Port {} description changed to {}."
                         .format(key, new_descr))
-            self.run_command("lldpcli configure lldp portidsubtype local {} description '{}'"
+            self.run_command("lldpcli configure ports {0} lldp portidsubtype local {0} description '{1}'"
                              .format(key, new_descr))
         # update local cache
         self.port_table[key] = data
@@ -64,7 +64,7 @@ class DBSyncDaemon(SonicSyncDaemon):
         self.port_table = self.config_db.get_table(PORT_TABLE_NAME)
         # supply LLDP_LOC_ENTRY_TABLE and lldpd with correct values on start
         for port_name, attributes in self.port_table.items():
-            self.run_command("lldpcli configure lldp portidsubtype local {} description '{}'"
+            self.run_command("lldpcli configure ports {0} lldp portidsubtype local {0} description '{1}'"
                              .format(port_name, attributes.get("description", " ")))
 
     def run(self):
