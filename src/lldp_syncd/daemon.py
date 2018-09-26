@@ -341,14 +341,15 @@ class LldpSyncDaemon(SonicSyncDaemon):
         logger.debug("Initiating LLDPd sync to Redis...")
 
         # push local chassis data to APP DB
-        chassis_update = parsed_update.pop('local-chassis')
-        if chassis_update != self.chassis_cache:
-            self.db_connector.delete(self.db_connector.APPL_DB,
-                                     LldpSyncDaemon.LLDP_LOC_CHASSIS_TABLE)
-            for k, v in chassis_update.items():
-                self.db_connector.set(self.db_connector.APPL_DB,
-                                      LldpSyncDaemon.LLDP_LOC_CHASSIS_TABLE, k, v, blocking=True)
-            logger.debug("sync'd: {}".format(json.dumps(chassis_update, indent=3)))
+        if parsed_update.has_key('local-chassis'):
+            chassis_update = parsed_update.pop('local-chassis')
+            if chassis_update != self.chassis_cache:
+                self.db_connector.delete(self.db_connector.APPL_DB,
+                                         LldpSyncDaemon.LLDP_LOC_CHASSIS_TABLE)
+                for k, v in chassis_update.items():
+                    self.db_connector.set(self.db_connector.APPL_DB,
+                                          LldpSyncDaemon.LLDP_LOC_CHASSIS_TABLE, k, v, blocking=True)
+                logger.debug("sync'd: {}".format(json.dumps(chassis_update, indent=3)))
 
         new, changed, deleted = self.cache_diff(self.interfaces_cache, parsed_update)
         # Delete LLDP_ENTRIES which were modified or are missing
