@@ -14,7 +14,6 @@ import re
 import lldp_syncd
 import lldp_syncd.conventions
 import lldp_syncd.daemon
-import lldp_syncd.dbsyncd
 from swsssdk import SonicV2Connector, ConfigDBConnector
 
 INPUT_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'subproc_outputs')
@@ -88,44 +87,3 @@ class TestLldpSyncDaemon(TestCase):
     def test_timeparse(self):
         self.assertEquals(lldp_syncd.daemon.parse_time("0 day, 05:09:02"), make_seconds(0, 5, 9, 2))
         self.assertEquals(lldp_syncd.daemon.parse_time("2 days, 05:59:02"), make_seconds(2, 5, 59, 2))
-
-
-class TestLldpSyncDaemonDBSync(TestCase):
-    
-    def setUp(self):
-        self.daemon = lldp_syncd.DBSyncDaemon()
-        with mock.patch.object(lldp_syncd.DBSyncDaemon, "run_command", mock.Mock()):
-            self.daemon.port_table_init()
-
-    def test_port_handler_descr(self):
-        """
-        test handling update of description of port
-        """
-        with mock.patch.object(lldp_syncd.DBSyncDaemon, "run_command", mock.Mock()):
-            self.daemon.port_handler("Ethernet4", {"description": "black door", "speed": '50000'})
-            self.daemon.run_command.assert_called_once_with(
-                "lldpcli configure lldp portidsubtype local Ethernet4 description 'black door'")
-
-    def test_port_handler_speed(self):
-        """
-        test updating port speed(no action expected)
-        """
-        with mock.patch.object(lldp_syncd.DBSyncDaemon, "run_command", mock.Mock()):
-            self.daemon.port_handler("Ethernet0", {"speed": '100000', "description": "hedgehog"})
-            self.daemon.run_command.assert_not_called()
-
-    def test_port_handler_delete_descr(self):
-        """
-        test handling update when description field is removed
-        """
-        with mock.patch.object(lldp_syncd.DBSyncDaemon, "run_command", mock.Mock()):
-            self.daemon.port_handler("Ethernet4", {"speed": '50000'})
-            self.daemon.run_command.assert_called_once_with(
-                "lldpcli configure lldp portidsubtype local Ethernet4 description ' '")
-
-    def test_man_addr_init(self):
-
-        with mock.patch.object(lldp_syncd.DBSyncDaemon, "run_command", mock.Mock()):
-            self.daemon.mgmt_addr_init()
-            self.daemon.run_command.assert_called_once_with(
-                "lldpcli configure system ip management pattern 10.210.25.41")
