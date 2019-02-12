@@ -5,4 +5,3 @@ logger.setLevel(logging.INFO)
 logger.addHandler(logging.NullHandler())
 
 from .daemon import LldpSyncDaemon
-from .dbsyncd import DBSyncDaemon
