@@ -294,6 +294,8 @@ class LldpSyncDaemon(SonicSyncDaemon):
             chassis_id = id_attributes.get('value', '')
             descr = attributes.get('descr', '')
             mgmt_ip = attributes.get('mgmt-ip', '')
+            if isinstance(mgmt_ip, list):
+                mgmt_ip = ','.join(mgmt_ip)
         except (KeyError, ValueError):
             logger.exception("Could not infer system information from: {}"
                              .format(chassis_attributes))
