@@ -295,9 +295,7 @@ class LldpSyncDaemon(SonicSyncDaemon):
             descr = attributes.get('descr', '')
             mgmt_ip = attributes.get('mgmt-ip', '')
             if isinstance(mgmt_ip, list):
-                mgmt_ip = ','.join(mgmt_ip).encode('utf-8')
-            else:
-                mgmt_ip = mgmt_ip.encode('utf-8')
+                mgmt_ip = ','.join(mgmt_ip)
         except (KeyError, ValueError):
             logger.exception("Could not infer system information from: {}"
                              .format(chassis_attributes))
