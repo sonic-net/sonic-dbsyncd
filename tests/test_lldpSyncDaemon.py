@@ -87,3 +87,17 @@ class TestLldpSyncDaemon(TestCase):
     def test_timeparse(self):
         self.assertEquals(lldp_syncd.daemon.parse_time("0 day, 05:09:02"), make_seconds(0, 5, 9, 2))
         self.assertEquals(lldp_syncd.daemon.parse_time("2 days, 05:59:02"), make_seconds(2, 5, 59, 2))
+
+    def test_parse_mgmt_ip(self):
+        parsed_update = self.daemon.parse_update(self._json)
+        mgmt_ip_str = parsed_update['local-chassis'].get('lldp_loc_man_addr')
+        json_chassis = json.dumps(self._json['lldp_loc_chassis']['local-chassis']['chassis'])
+        chassis_dict = json.loads(json_chassis)
+        json_mgmt_ip = chassis_dict.values()[0]['mgmt-ip']
+        if isinstance(json_mgmt_ip, list):
+            i=0
+            for mgmt_ip in mgmt_ip_str.split(','):
+                self.assertEquals(mgmt_ip, json_mgmt_ip[i])
+                i+=1
+        else:
+            self.assertEquals(mgmt_ip, json_mgmt_ip)
