@@ -2,8 +2,8 @@
   Install the following packages
   ```
    sudo apt-get install python-setuptools
-   sudo apt-get install python-pytest
    sudo apt-get install python-pip
+   sudo pip install pytest
    sudo pip install mockredispy
    sudo pip install mock
   ```
