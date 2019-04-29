@@ -67,7 +67,7 @@ class TestLldpSyncDaemon(TestCase):
         dump = {}
         for k in keys:
             # The test case is for LLDP neighbor information.
-            # Need to filer LLDP_LOC_CHASSIS entry because the entry is removed from parsed_update after executing daemon.sync().
+            # Need to filter LLDP_LOC_CHASSIS entry because the entry is removed from parsed_update after executing daemon.sync().
             if k != 'LLDP_LOC_CHASSIS':
                 dump[k] = db.get_all(db.APPL_DB, k)
         print(json.dumps(dump, indent=3))
