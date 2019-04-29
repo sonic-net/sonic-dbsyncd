@@ -66,7 +66,10 @@ class TestLldpSyncDaemon(TestCase):
 
         dump = {}
         for k in keys:
-            dump[k] = db.get_all(db.APPL_DB, k)
+            # The test case id for LLDP neighbor information.
+            # Need to filer LLDP_LOC_CHASSIS entry because the entry is removed from parsed_update after executing daemon.sync().
+            if k != 'LLDP_LOC_CHASSIS':
+                dump[k] = db.get_all(db.APPL_DB, k)
         print(json.dumps(dump, indent=3))
 
         # convert dict keys to ints for easy comparison
@@ -101,3 +104,11 @@ class TestLldpSyncDaemon(TestCase):
                 i+=1
         else:
             self.assertEquals(mgmt_ip, json_mgmt_ip)
+
+    def test_loc_chassis(self):
+        parsed_update = self.daemon.parse_update(self._json)
+        parsed_loc_chassis = parsed_update['local-chassis']
+        self.daemon.sync(parsed_update)
+        db = create_dbconnector()
+        db_loc_chassis_data = db.get_all(db.APPL_DB, 'LLDP_LOC_CHASSIS')
+        self.assertEquals(parsed_loc_chassis, db_loc_chassis_data)
