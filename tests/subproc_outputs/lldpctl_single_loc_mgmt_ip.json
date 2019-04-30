@@ -1,0 +1,169 @@
+{
+  "lldp_loc_chassis":{
+    "local-chassis": {
+      "chassis": {
+        "arc-switch1025": {
+          "mgmt-ip": "10.1.0.32",
+          "id": {
+            "type": "mac",
+            "value": "7c:fe:90:63:f4:66"
+          },
+          "capability": [
+            {
+              "type": "Bridge",
+              "enabled": true
+            },
+            {
+              "type": "Router",
+              "enabled": true
+            },
+            {
+              "type": "Wlan",
+              "enabled": false
+            },
+            {
+              "type": "Station",
+              "enabled": false
+            }
+          ],
+          "descr": "Debian GNU/Linux 8 (jessie) Linux 3.16.0-5-amd64 #1 SMP Debian 3.16.51-3+deb8u1 (2018-01-08) x86_64",
+          "ttl": "120"
+        }
+      }
+    }
+  },
+  "lldp": {
+    "interface": [
+      {
+        "eth0": {
+          "rid": "2",
+          "port": {
+            "id": {
+              "type": "ifname",
+              "value": "ge-0/0/17"
+            },
+            "descr": "TPS report vending machine",
+            "mfs": "1514",
+            "auto-negotiation": {
+              "supported": true,
+              "enabled": true,
+              "advertised": [
+                {
+                  "type": "10Base-T",
+                  "hd": true,
+                  "fd": true
+                },
+                {
+                  "type": "100Base-TX",
+                  "hd": true,
+                  "fd": true
+                },
+                {
+                  "type": "1000Base-T",
+                  "hd": false,
+                  "fd": true
+                }
+              ],
+              "current": "unknown"
+            }
+          },
+          "via": "LLDP",
+          "age": "0 day, 05:09:02",
+          "chassis": {
+            "switch218ad08": {
+              "id": {
+                "type": "mac",
+                "value": "00:11:22:33:44:55"
+              },
+              "ttl": "90",
+              "descr": "I'm going to need you to come in on saturday",
+              "capability": [
+                {
+                  "type": "Bridge",
+                  "enabled": true
+                },
+                {
+                  "type": "Router",
+                  "enabled": true
+                }
+              ]
+            }
+          },
+          "vlan": {
+            "vlan-id": "146",
+            "pvid": true,
+            "value": "ntp"
+          },
+          "lldp-med": {
+            "capability": [
+              {
+                "type": "Capabilities",
+                "available": true
+              },
+              {
+                "type": "Policy",
+                "available": true
+              },
+              {
+                "type": "Location",
+                "available": true
+              },
+              {
+                "type": "MDI/PSE",
+                "available": true
+              }
+            ],
+            "device-type": "Network Connectivity Device"
+          },
+          "unknown-tlvs": {
+            "unknown-tlv": {
+              "oui": "00,90,69",
+              "subtype": "1",
+              "len": "12",
+              "value": "43,55,30,32,31,33,35,31,30,36,35,30"
+            }
+          }
+        }
+      },
+      {
+        "Ethernet0": {
+          "rid": "1",
+          "port": {
+            "id": {
+              "type": "ifname",
+              "value": "Ethernet1"
+            },
+            "mfs": "9236"
+          },
+          "via": "LLDP",
+          "chassis": {
+            "switch13": {
+              "mgmt-ip": "10.3.147.196",
+              "id": {
+                "type": "mac",
+                "value": "00:11:22:33:44:55"
+              },
+              "ttl": "120",
+              "descr": "I'm a little teapot.",
+              "capability": [
+                {
+                  "type": "Bridge",
+                  "enabled": true
+                },
+                {
+                  "type": "Router",
+                  "enabled": true
+                }
+              ]
+            }
+          },
+          "age": "0 day, 05:09:05",
+          "vlan": {
+            "vlan-id": "101",
+            "pvid": true
+          }
+        }
+      }
+    ]
+  }
+}
