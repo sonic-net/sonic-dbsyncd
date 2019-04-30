@@ -47,6 +47,9 @@ class TestLldpSyncDaemon(TestCase):
         with open(os.path.join(INPUT_DIR, 'lldpctl_single_loc_mgmt_ip.json')) as f:
             self._single_loc_mgmt_ip = json.load(f)
 
+        with open(os.path.join(INPUT_DIR, 'interface_only.json')) as f:
+            self._interface_only = json.load(f)
+
         self.daemon = lldp_syncd.LldpSyncDaemon()
 
     def test_parse_json(self):
@@ -121,3 +124,10 @@ class TestLldpSyncDaemon(TestCase):
         db = create_dbconnector()
         db_loc_chassis_data = db.get_all(db.APPL_DB, 'LLDP_LOC_CHASSIS')
         self.assertEquals(parsed_loc_chassis, db_loc_chassis_data)
+
+    def test_remote_sys_capability_list(self):
+        interface_list = self._interface_only['lldp'].get('interface')
+        for interface in interface_list:
+            (if_name, if_attributes), = interface.items()
+            capability_list = self.daemon.get_sys_capability_list(if_attributes)
+            self.assertNotEqual(capability_list, [])
