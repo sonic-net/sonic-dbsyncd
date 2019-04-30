@@ -460,5 +460,14 @@
     "lldp_rem_sys_name": "switch13",
     "lldp_rem_port_id": "Ethernet4",
     "lldp_rem_man_addr": "10.3.147.196"
+  },
+  "LLDP_LOC_CHASSIS": {
+    "lldp_loc_chassis_id_subtype": "4",
+    "lldp_loc_chassis_id": "7c:fe:90:63:f4:66",
+    "lldp_loc_sys_name": "arc-switch1025",
+    "lldp_loc_sys_desc": "Debian GNU/Linux 8 (jessie) Linux 3.16.0-5-amd64 #1 SMP Debian 3.16.51-3+deb8u1 (2018-01-08) x86_64",
+    "lldp_loc_man_addr": "10.1.0.32,fc00:1::32",
+    "lldp_loc_sys_cap_supported": "28 00",
+    "lldp_loc_sys_cap_enabled": "28 00"
   }
 }
