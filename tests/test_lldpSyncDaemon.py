@@ -103,7 +103,7 @@ class TestLldpSyncDaemon(TestCase):
                 self.assertEquals(mgmt_ip, json_mgmt_ip[i])
                 i+=1
         else:
-            self.assertEquals(mgmt_ip, json_mgmt_ip)
+            self.assertEquals(mgmt_ip_str, json_mgmt_ip)
 
     def test_loc_chassis(self):
         parsed_update = self.daemon.parse_update(self._json)
