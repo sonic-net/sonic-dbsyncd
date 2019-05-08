@@ -32,10 +32,12 @@
             ]
           },
           "age": "0 day, 05:09:05",
-          "vlan": {
-            "vlan-id": "101",
-            "pvid": true
-          }
+          "vlan": [
+            {
+              "vlan-id": "101",
+              "pvid": true
+            }
+          ]
         }
       },
       {
@@ -71,10 +73,12 @@
             }
           },
           "age": "0 day, 05:09:04",
-          "vlan": {
-            "vlan-id": "126",
-            "pvid": true
-          }
+          "vlan": [
+            {
+              "vlan-id": "126",
+              "pvid": true
+            }
+          ]
         }
       }
     ]
