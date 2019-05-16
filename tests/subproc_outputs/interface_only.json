@@ -36,6 +36,10 @@
             {
               "vlan-id": "101",
               "pvid": true
+            },
+            {
+              "vlan-id": "201",
+              "value": "vlan201"
             }
           ]
         }
@@ -73,12 +77,10 @@
             }
           },
           "age": "0 day, 05:09:04",
-          "vlan": [
-            {
-              "vlan-id": "126",
-              "pvid": true
-            }
-          ]
+          "vlan": {
+            "vlan-id": "126",
+            "pvid": true
+          }
         }
       }
     ]
