@@ -333,10 +333,10 @@ class LldpSyncDaemon(SonicSyncDaemon):
         :param update: Update dict
         :return: new, changed, deleted keys tuple
         """
-        new_keys = [key for key in update.keys() if key not in cache.keys()]
-        changed_keys = list(set(key for key in update.keys() + cache.keys()
-                            if update[key] != cache.get(key)))
-        deleted_keys = [key for key in cache.keys() if key not in update.keys()]
+        new_keys = list(set(update.keys()) - set(cache.keys()))
+        changed_keys = list(set(key for key in set(update.keys()) & set(cache.keys()) if update[key] != cache[key]))
+        deleted_keys = list(set(cache.keys()) - set(update.keys()))
+
         return new_keys, changed_keys, deleted_keys
 
     def sync(self, parsed_update):
@@ -357,6 +357,7 @@ class LldpSyncDaemon(SonicSyncDaemon):
                 logger.debug("sync'd: {}".format(json.dumps(chassis_update, indent=3)))
 
         new, changed, deleted = self.cache_diff(self.interfaces_cache, parsed_update)
+        self.interfaces_cache = parsed_update
         # Delete LLDP_ENTRIES which were modified or are missing
         for interface in changed + deleted:
             table_key = ':'.join([LldpSyncDaemon.LLDP_ENTRY_TABLE, interface])
