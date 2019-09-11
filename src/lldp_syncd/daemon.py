@@ -335,7 +335,7 @@ class LldpSyncDaemon(SonicSyncDaemon):
         """
         new_keys = list(set(update.keys()) - set(cache.keys()))
         changed_keys = list(set(key for key in set(update.keys()) & set(cache.keys()) if update[key] != cache[key]))
-        deleted_keys = list(set(cache.keys()) - set( update.keys()))
+        deleted_keys = list(set(cache.keys()) - set(update.keys()))
 
         return new_keys, changed_keys, deleted_keys
 
