@@ -16,7 +16,10 @@ LLDPD_TIME_FORMAT = '%H:%M:%S'
 
 DEFAULT_UPDATE_INTERVAL = 10
 
-SONIC_ETHERNET_RE_PATTERN = r'^(Ethernet(\d+)|eth0)$'
+# Match Front | Backplace | Management interface
+# TODO: Need to chamge to util function which can provide
+# backplane interface name.
+SONIC_ETHERNET_RE_PATTERN = r'^(Ethernet(\d+)|Ethernet-BP(\d+)|eth0)$'
 LLDPD_UPTIME_RE_SPLIT_PATTERN = r' days?, '
 
 
