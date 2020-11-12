@@ -113,7 +113,7 @@ class LldpSyncDaemon(SonicSyncDaemon):
         # chassis = int(LldpChassisIdSubtype.chassisComponent) # (unsupported by lldpd)
         local = int(LldpPortIdSubtype.local)
 
-    def get_sys_capability_list(self, if_attributes):
+    def get_sys_capability_list(self, if_attributes, if_name, chassis_id):
         """
         Get a list of capabilities from interface attributes dictionary.
         :param if_attributes: interface attributes
@@ -129,7 +129,7 @@ class LldpSyncDaemon(SonicSyncDaemon):
             if isinstance(capability_list, dict):
                 capability_list = [capability_list]
         except KeyError:
-            logger.error("Failed to get system capabilities")
+            logger.info("Failed to get system capabilities on {} ({})".format(if_name, chassis_id))
             return []
         return capability_list
 
@@ -236,6 +236,8 @@ class LldpSyncDaemon(SonicSyncDaemon):
                     parsed_port = zip(rem_port_keys, self.parse_port(if_attributes['port']))
                     parsed_interfaces[if_name].update(parsed_port)
 
+                chassis_id = ''
+
                 if 'chassis' in if_attributes:
                     rem_chassis_keys = ('lldp_rem_chassis_id_subtype',
                                         'lldp_rem_chassis_id',
@@ -245,6 +247,7 @@ class LldpSyncDaemon(SonicSyncDaemon):
                     parsed_chassis = zip(rem_chassis_keys,
                                          self.parse_chassis(if_attributes['chassis']))
                     parsed_interfaces[if_name].update(parsed_chassis)
+                    chassis_id = parsed_chassis[1][1]
 
                 # lldpRemTimeMark           TimeFilter,
                 parsed_interfaces[if_name].update({'lldp_rem_time_mark':
@@ -253,7 +256,7 @@ class LldpSyncDaemon(SonicSyncDaemon):
                 # lldpRemIndex
                 parsed_interfaces[if_name].update({'lldp_rem_index': str(if_attributes.get('rid'))})
 
-                capability_list = self.get_sys_capability_list(if_attributes)
+                capability_list = self.get_sys_capability_list(if_attributes, if_name, chassis_id)
                 # lldpSysCapSupported
                 parsed_interfaces[if_name].update({'lldp_rem_sys_cap_supported':
                                                    self.parse_sys_capabilities(capability_list)})
@@ -272,7 +275,7 @@ class LldpSyncDaemon(SonicSyncDaemon):
                                                             ['local-chassis']['chassis'])))
 
                     loc_capabilities = self.get_sys_capability_list(lldp_json['lldp_loc_chassis']
-                                                                    ['local-chassis'])
+                                                                    ['local-chassis'], if_name, chassis_id)
                     # lldpLocSysCapSupported
                     parsed_chassis.update({'lldp_loc_sys_cap_supported':
                                           self.parse_sys_capabilities(loc_capabilities)})
