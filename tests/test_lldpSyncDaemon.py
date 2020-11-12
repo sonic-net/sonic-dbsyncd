@@ -129,5 +129,5 @@ class TestLldpSyncDaemon(TestCase):
         interface_list = self._interface_only['lldp'].get('interface')
         for interface in interface_list:
             (if_name, if_attributes), = interface.items()
-            capability_list = self.daemon.get_sys_capability_list(if_attributes)
+            capability_list = self.daemon.get_sys_capability_list(if_attributes, if_name, "fake_chassis_id")
             self.assertNotEqual(capability_list, [])
