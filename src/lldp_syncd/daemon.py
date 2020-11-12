@@ -43,9 +43,17 @@ def parse_time(time_str):
             return sage;
     }
     :return: parsed age in time ticks (or seconds)
+             0 on invalid time_str
     """
+    if '-' in time_str:
+        return 0 
+
     days, hour_min_secs = re.split(LLDPD_UPTIME_RE_SPLIT_PATTERN, time_str)
-    struct_time = time.strptime(hour_min_secs, LLDPD_TIME_FORMAT)
+    try:
+        struct_time = time.strptime(hour_min_secs, LLDPD_TIME_FORMAT)
+    except ValueError:
+        logger.warning("Invalid time {}, possibly system time changed?".format(hour_min_secs))
+        return 0
     time_delta = datetime.timedelta(days=int(days), hours=struct_time.tm_hour,
                                     minutes=struct_time.tm_min,
                                     seconds=struct_time.tm_sec)
