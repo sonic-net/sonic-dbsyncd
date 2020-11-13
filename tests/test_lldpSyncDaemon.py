@@ -17,6 +17,7 @@ import lldp_syncd.daemon
 from swsssdk import SonicV2Connector, ConfigDBConnector
 
 INPUT_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'subproc_outputs')
+PY3x = sys.version_info >= (3, 0)
 
 
 def create_dbconnector():
@@ -32,6 +33,11 @@ def make_seconds(days, hours, minutes, seconds):
     """
     return seconds + (60 * minutes) + (60 * 60 * hours) + (24 * 60 * 60 * days)
 
+class BytesDump(json.JSONEncoder):
+    def default(self, obj):
+        if isinstance(obj, bytes):
+            return obj.decode()
+        return json.JSONEncoder.default(self, obj)
 
 class TestLldpSyncDaemon(TestCase):
     def setUp(self):
@@ -52,17 +58,20 @@ class TestLldpSyncDaemon(TestCase):
 
         self.daemon = lldp_syncd.LldpSyncDaemon()
 
+    def decode_dict(self, src):
+        return {k.decode(): src.get(k).decode() for k in src.keys()}
+
     def test_parse_json(self):
         jo = self.daemon.parse_update(self._json)
-        print(json.dumps(jo, indent=3))
+        print((json.dumps(jo, indent=3)))
 
     def test_parse_short(self):
         jo = self.daemon.parse_update(self._json_short)
-        print(json.dumps(jo, indent=3))
+        print((json.dumps(jo, indent=3)))
 
     def test_parse_short_short(self):
         jo = self.daemon.parse_update(self._json_short_short)
-        print(json.dumps(jo, indent=3))
+        print((json.dumps(jo, indent=3)))
 
     def test_sync_roundtrip(self):
         parsed_update = self.daemon.parse_update(self._json)
@@ -74,17 +83,18 @@ class TestLldpSyncDaemon(TestCase):
         for k in keys:
             # The test case is for LLDP neighbor information.
             # Need to filter LLDP_LOC_CHASSIS entry because the entry is removed from parsed_update after executing daemon.sync().
+            k = k.decode()
             if k != 'LLDP_LOC_CHASSIS':
                 dump[k] = db.get_all(db.APPL_DB, k)
         print(json.dumps(dump, indent=3))
 
         # convert dict keys to ints for easy comparison
         jo = {int(re.findall(r'\d+', k)[0]): v for k, v in parsed_update.items()}
-        r_out = {int(re.findall(r'\d+', k)[0]): v for k, v in dump.items()}
-        self.assertEqual(jo, r_out)
+        r_out = {int(re.findall(r'\d+', k)[0]): self.decode_dict(v) for k, v in dump.items()}
+        self.assertDictEqual(jo, r_out)
 
         # test enumerations
-        for k, v in r_out.items():
+        for k, v in list(r_out.items()):
             chassis_subtype = v['lldp_rem_chassis_id_subtype']
             chassis_id = v['lldp_rem_chassis_id']
             if int(chassis_subtype) == lldp_syncd.conventions.LldpChassisIdSubtype.macAddress:
@@ -94,22 +104,22 @@ class TestLldpSyncDaemon(TestCase):
                 self.fail("Test data only contains chassis MACs")
 
     def test_timeparse(self):
-        self.assertEquals(lldp_syncd.daemon.parse_time("0 day, 05:09:02"), make_seconds(0, 5, 9, 2))
-        self.assertEquals(lldp_syncd.daemon.parse_time("2 days, 05:59:02"), make_seconds(2, 5, 59, 2))
+        self.assertEqual(lldp_syncd.daemon.parse_time("0 day, 05:09:02"), make_seconds(0, 5, 9, 2))
+        self.assertEqual(lldp_syncd.daemon.parse_time("2 days, 05:59:02"), make_seconds(2, 5, 59, 2))
 
     def parse_mgmt_ip(self, json_file):
         parsed_update = self.daemon.parse_update(json_file)
         mgmt_ip_str = parsed_update['local-chassis'].get('lldp_loc_man_addr')
         json_chassis = json.dumps(json_file['lldp_loc_chassis']['local-chassis']['chassis'])
         chassis_dict = json.loads(json_chassis)
-        json_mgmt_ip = chassis_dict.values()[0]['mgmt-ip']
+        json_mgmt_ip = list(chassis_dict.values())[0]['mgmt-ip']
         if isinstance(json_mgmt_ip, list):
             i=0
             for mgmt_ip in mgmt_ip_str.split(','):
-                self.assertEquals(mgmt_ip, json_mgmt_ip[i])
+                self.assertEqual(mgmt_ip, json_mgmt_ip[i])
                 i+=1
         else:
-            self.assertEquals(mgmt_ip_str, json_mgmt_ip)
+            self.assertEqual(mgmt_ip_str, json_mgmt_ip)
 
     def test_multiple_mgmt_ip(self):
         self.parse_mgmt_ip(self._json)
@@ -123,11 +133,15 @@ class TestLldpSyncDaemon(TestCase):
         self.daemon.sync(parsed_update)
         db = create_dbconnector()
         db_loc_chassis_data = db.get_all(db.APPL_DB, 'LLDP_LOC_CHASSIS')
-        self.assertEquals(parsed_loc_chassis, db_loc_chassis_data)
+        if PY3x:
+            db_loc_chassis_data = {
+                k.decode(): db_loc_chassis_data.get(k).decode() for k in db_loc_chassis_data.keys()
+            }
+        self.assertEqual(parsed_loc_chassis, db_loc_chassis_data)
 
     def test_remote_sys_capability_list(self):
         interface_list = self._interface_only['lldp'].get('interface')
         for interface in interface_list:
-            (if_name, if_attributes), = interface.items()
+            (if_name, if_attributes), = list(interface.items())
             capability_list = self.daemon.get_sys_capability_list(if_attributes)
             self.assertNotEqual(capability_list, [])

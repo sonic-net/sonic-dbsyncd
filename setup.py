@@ -1,9 +1,15 @@
-from setuptools import setup, find_packages
+import sys
+
+from setuptools import setup
+
+PY3x = sys.version_info >= (3, 0)
 
 dependencies = [
     'swsssdk>=1.3.0',
+] + ([
+] if PY3x else [
     'enum34>=1.1.6',
-]
+])
 
 test_deps = [
     'mockredispy>=2.9.3',
@@ -17,7 +23,11 @@ setup(
     name='sonic-d',
     install_requires=dependencies,
     version='2.0.0',
-    packages=find_packages('src'),
+    packages=[
+        'src/sonic_syncd',
+        'src/lldp_syncd',
+        'tests',
+    ],
     extras_require={
         'testing': test_deps,
         'high_perf': high_performance_deps,
@@ -31,10 +41,31 @@ setup(
         'sonic_syncd': 'src/sonic_syncd',
         'lldp_syncd': 'src/lldp_syncd',
     },
-    classifiers=[
+    package_data={
+        'tests': [
+            'mock_tables/*',
+            'subproc_outputs/*',
+            '*.py',
+        ]
+    },
+    setup_requires= [
+        'pytest-runner',
+        'wheel',
+    ],
+    tests_require=[
+        'pytest',
+        'mock>=2.0.0',
+        'mockredispy>=2.9.3',
+    ],
+    classifiers = [
         'Intended Audience :: Developers',
-        'Operating System :: Linux',
-        'Programming Language :: Python',
+        'Natural Language :: English',
+        'Programming Language :: Python :: 2',
         'Programming Language :: Python :: 2.7',
+        'Programming Language :: Python :: 3',
+        'Programming Language :: Python :: 3.5',
+        'Programming Language :: Python :: 3.6',
+        'Programming Language :: Python :: 3.7',
+        'Programming Language :: Python :: 3.8',
     ],
 )

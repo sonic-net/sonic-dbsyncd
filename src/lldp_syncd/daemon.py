@@ -124,7 +124,7 @@ class LldpSyncDaemon(SonicSyncDaemon):
             if 'capability' in if_attributes['chassis']:
                 capability_list = if_attributes['chassis']['capability']
             else:
-                capability_list = if_attributes['chassis'].values()[0]['capability']
+                capability_list = list(if_attributes['chassis'].values())[0]['capability']
             # {'enabled': ..., 'type': 'capability'}
             if isinstance(capability_list, dict):
                 capability_list = [capability_list]
@@ -242,8 +242,8 @@ class LldpSyncDaemon(SonicSyncDaemon):
                                         'lldp_rem_sys_name',
                                         'lldp_rem_sys_desc',
                                         'lldp_rem_man_addr')
-                    parsed_chassis = zip(rem_chassis_keys,
-                                         self.parse_chassis(if_attributes['chassis']))
+                    parsed_chassis = list(zip(rem_chassis_keys,
+                                         self.parse_chassis(if_attributes['chassis'])))
                     parsed_interfaces[if_name].update(parsed_chassis)
 
                 # lldpRemTimeMark           TimeFilter,
@@ -293,7 +293,7 @@ class LldpSyncDaemon(SonicSyncDaemon):
                 attributes = chassis_attributes
                 id_attributes = chassis_attributes['id']
             else:
-                (sys_name, attributes) = chassis_attributes.items()[0]
+                (sys_name, attributes) = list(chassis_attributes.items())[0]
                 id_attributes = attributes.get('id', '')
 
             chassis_id_subtype = str(self.ChassisIdSubtypeMap[id_attributes['type']].value)
@@ -349,7 +349,7 @@ class LldpSyncDaemon(SonicSyncDaemon):
         logger.debug("Initiating LLDPd sync to Redis...")
 
         # push local chassis data to APP DB
-        if parsed_update.has_key('local-chassis'):
+        if 'local-chassis' in parsed_update:
             chassis_update = parsed_update.pop('local-chassis')
             if chassis_update != self.chassis_cache:
                 self.db_connector.delete(self.db_connector.APPL_DB,
