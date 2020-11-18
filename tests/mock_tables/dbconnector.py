@@ -44,15 +44,15 @@ class SwssSyncClient(mockredis.MockRedis):
         if db == 0:
             with open(INPUT_DIR + '/LLDP_ENTRY_TABLE.json') as f:
                 db = json.load(f)
-                for h, table in db.items():
-                    for k, v in table.items():
+                for h, table in list(db.items()):
+                    for k, v in list(table.items()):
                         self.hset(h, k, v)
 
         elif db == 4:
             with open(INPUT_DIR + '/CONFIG_DB.json') as f:
                 db = json.load(f)
-                for h, table in db.items():
-                    for k, v in table.items():
+                for h, table in list(db.items()):
+                    for k, v in list(table.items()):
                         self.hset(h, k, v)
 
     # Patch mockredis/mockredis/client.py
@@ -76,7 +76,7 @@ class SwssSyncClient(mockredis.MockRedis):
         regex = re.compile(regex)
 
         # Find every key that matches the pattern
-        return [key for key in self.redis.keys() if regex.match(key.decode('utf-8'))]
+        return [key for key in list(self.redis.keys()) if regex.match(key.decode('utf-8'))]
 
 
 swsssdk.interface.DBInterface._subscribe_keyspace_notification = _subscribe_keyspace_notification

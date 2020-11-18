@@ -124,7 +124,7 @@ class LldpSyncDaemon(SonicSyncDaemon):
             if 'capability' in if_attributes['chassis']:
                 capability_list = if_attributes['chassis']['capability']
             else:
-                capability_list = if_attributes['chassis'].values()[0]['capability']
+                capability_list = list(if_attributes['chassis'].values())[0]['capability']
             # {'enabled': ..., 'type': 'capability'}
             if isinstance(capability_list, dict):
                 capability_list = [capability_list]
@@ -223,7 +223,7 @@ class LldpSyncDaemon(SonicSyncDaemon):
             for interface in interface_list:
                 try:
                     # [{'if_name' : { attributes...}}, {'if_other': {...}}, ...]
-                    (if_name, if_attributes), = interface.items()
+                    (if_name, if_attributes), = list(interface.items())
                 except AttributeError:
                     # {'if_name' : { attributes...}}, {'if_other': {...}}
                     if_name = interface
@@ -233,7 +233,7 @@ class LldpSyncDaemon(SonicSyncDaemon):
                     rem_port_keys = ('lldp_rem_port_id_subtype',
                                      'lldp_rem_port_id',
                                      'lldp_rem_port_desc')
-                    parsed_port = zip(rem_port_keys, self.parse_port(if_attributes['port']))
+                    parsed_port = list(zip(rem_port_keys, self.parse_port(if_attributes['port'])))
                     parsed_interfaces[if_name].update(parsed_port)
 
                 chassis_id = ''
@@ -244,8 +244,8 @@ class LldpSyncDaemon(SonicSyncDaemon):
                                         'lldp_rem_sys_name',
                                         'lldp_rem_sys_desc',
                                         'lldp_rem_man_addr')
-                    parsed_chassis = zip(rem_chassis_keys,
-                                         self.parse_chassis(if_attributes['chassis']))
+                    parsed_chassis = list(zip(rem_chassis_keys,
+                                         self.parse_chassis(if_attributes['chassis'])))
                     parsed_interfaces[if_name].update(parsed_chassis)
                     chassis_id = parsed_chassis[1][1]
 
@@ -270,9 +270,9 @@ class LldpSyncDaemon(SonicSyncDaemon):
                                         'lldp_loc_sys_name',
                                         'lldp_loc_sys_desc',
                                         'lldp_loc_man_addr')
-                    parsed_chassis = dict(zip(loc_chassis_keys,
+                    parsed_chassis = dict(list(zip(loc_chassis_keys,
                                          self.parse_chassis(lldp_json['lldp_loc_chassis']
-                                                            ['local-chassis']['chassis'])))
+                                                            ['local-chassis']['chassis']))))
 
                     loc_capabilities = self.get_sys_capability_list(lldp_json['lldp_loc_chassis']
                                                                     ['local-chassis'], if_name, chassis_id)
@@ -296,7 +296,7 @@ class LldpSyncDaemon(SonicSyncDaemon):
                 attributes = chassis_attributes
                 id_attributes = chassis_attributes['id']
             else:
-                (sys_name, attributes) = chassis_attributes.items()[0]
+                (sys_name, attributes) = list(chassis_attributes.items())[0]
                 id_attributes = attributes.get('id', '')
 
             chassis_id_subtype = str(self.ChassisIdSubtypeMap[id_attributes['type']].value)
@@ -352,12 +352,12 @@ class LldpSyncDaemon(SonicSyncDaemon):
         logger.debug("Initiating LLDPd sync to Redis...")
 
         # push local chassis data to APP DB
-        if parsed_update.has_key('local-chassis'):
+        if 'local-chassis' in parsed_update:
             chassis_update = parsed_update.pop('local-chassis')
             if chassis_update != self.chassis_cache:
                 self.db_connector.delete(self.db_connector.APPL_DB,
                                          LldpSyncDaemon.LLDP_LOC_CHASSIS_TABLE)
-                for k, v in chassis_update.items():
+                for k, v in list(chassis_update.items()):
                     self.db_connector.set(self.db_connector.APPL_DB,
                                           LldpSyncDaemon.LLDP_LOC_CHASSIS_TABLE, k, v, blocking=True)
                 logger.debug("sync'd: {}".format(json.dumps(chassis_update, indent=3)))
@@ -375,6 +375,6 @@ class LldpSyncDaemon(SonicSyncDaemon):
                 continue
             # port_table_key = LLDP_ENTRY_TABLE:INTERFACE_NAME;
             table_key = ':'.join([LldpSyncDaemon.LLDP_ENTRY_TABLE, interface])
-            for k, v in parsed_update[interface].items():
+            for k, v in list(parsed_update[interface].items()):
                 self.db_connector.set(self.db_connector.APPL_DB, table_key, k, v, blocking=True)
             logger.debug("sync'd: \n{}".format(json.dumps(parsed_update[interface], indent=3)))

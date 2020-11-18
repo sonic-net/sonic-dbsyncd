@@ -49,7 +49,7 @@
     "lldp_rem_chassis_id": "00:11:22:33:44:55",
     "lldp_rem_sys_desc": "I'm a little teapot.",
     "lldp_rem_time_mark": 18545,
-    "lldp_rem_port_desc": "this is a port description",
+    "lldp_rem_port_desc": "",
     "lldp_rem_chassis_id_subtype": 4,
     "lldp_rem_sys_name": "switch13",
     "lldp_rem_port_id": "Ethernet1",
