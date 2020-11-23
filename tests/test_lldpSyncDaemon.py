@@ -32,17 +32,6 @@ def make_seconds(days, hours, minutes, seconds):
     """
     return seconds + (60 * minutes) + (60 * 60 * hours) + (24 * 60 * 60 * days)
 
-def decode_dict(d):
-    result = {}
-    for key, value in d.items():
-        if isinstance(key, bytes):
-            key = key.decode()
-        if isinstance(value, bytes):
-           value = value.decode()
-        elif isinstance(value, dict):
-           value = decode_dict(value)
-        result.update({key: value})
-    return result
 
 class TestLldpSyncDaemon(TestCase):
     def setUp(self):
@@ -65,15 +54,15 @@ class TestLldpSyncDaemon(TestCase):
 
     def test_parse_json(self):
         jo = self.daemon.parse_update(self._json)
-        print((json.dumps(jo, indent=3)))
+        print(json.dumps(jo, indent=3))
 
     def test_parse_short(self):
         jo = self.daemon.parse_update(self._json_short)
-        print((json.dumps(jo, indent=3)))
+        print(json.dumps(jo, indent=3))
 
     def test_parse_short_short(self):
         jo = self.daemon.parse_update(self._json_short_short)
-        print((json.dumps(jo, indent=3)))
+        print(json.dumps(jo, indent=3))
 
     def test_sync_roundtrip(self):
         parsed_update = self.daemon.parse_update(self._json)
@@ -85,17 +74,16 @@ class TestLldpSyncDaemon(TestCase):
         for k in keys:
             # The test case is for LLDP neighbor information.
             # Need to filter LLDP_LOC_CHASSIS entry because the entry is removed from parsed_update after executing daemon.sync().
-            if k.decode() != 'LLDP_LOC_CHASSIS':
+            if k != 'LLDP_LOC_CHASSIS':
                 dump[k] = db.get_all(db.APPL_DB, k)
-        decoded_dump = decode_dict(dump)
-        print((json.dumps(decoded_dump, indent=3)))
+        print(json.dumps(dump, indent=3))
 
         # convert dict keys to ints for easy comparison
-        jo = {'LLDP_ENTRY_TABLE:'+ k: v for k, v in list(parsed_update.items())}
-        self.assertEqual(jo, decoded_dump)
+        jo = {'LLDP_ENTRY_TABLE:'+ k: v for k, v in parsed_update.items()}
+        self.assertEqual(jo, dump)
 
         # test enumerations
-        for k, v in list(decoded_dump.items()):
+        for k, v in dump.items():
             chassis_subtype = v['lldp_rem_chassis_id_subtype']
             chassis_id = v['lldp_rem_chassis_id']
             if int(chassis_subtype) == lldp_syncd.conventions.LldpChassisIdSubtype.macAddress:
@@ -134,11 +122,11 @@ class TestLldpSyncDaemon(TestCase):
         self.daemon.sync(parsed_update)
         db = create_dbconnector()
         db_loc_chassis_data = db.get_all(db.APPL_DB, 'LLDP_LOC_CHASSIS')
-        self.assertEqual(parsed_loc_chassis, decode_dict(db_loc_chassis_data))
+        self.assertEqual(parsed_loc_chassis, db_loc_chassis_data)
 
     def test_remote_sys_capability_list(self):
         interface_list = self._interface_only['lldp'].get('interface')
         for interface in interface_list:
-            (if_name, if_attributes), = list(interface.items())
+            (if_name, if_attributes), = interface.items()
             capability_list = self.daemon.get_sys_capability_list(if_attributes, if_name, "fake_chassis_id")
             self.assertNotEqual(capability_list, [])

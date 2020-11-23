@@ -223,7 +223,7 @@ class LldpSyncDaemon(SonicSyncDaemon):
             for interface in interface_list:
                 try:
                     # [{'if_name' : { attributes...}}, {'if_other': {...}}, ...]
-                    (if_name, if_attributes), = list(interface.items())
+                    (if_name, if_attributes), = interface.items()
                 except AttributeError:
                     # {'if_name' : { attributes...}}, {'if_other': {...}}
                     if_name = interface
@@ -270,9 +270,9 @@ class LldpSyncDaemon(SonicSyncDaemon):
                                         'lldp_loc_sys_name',
                                         'lldp_loc_sys_desc',
                                         'lldp_loc_man_addr')
-                    parsed_chassis = dict(list(zip(loc_chassis_keys,
+                    parsed_chassis = dict(zip(loc_chassis_keys,
                                          self.parse_chassis(lldp_json['lldp_loc_chassis']
-                                                            ['local-chassis']['chassis']))))
+                                                            ['local-chassis']['chassis'])))
 
                     loc_capabilities = self.get_sys_capability_list(lldp_json['lldp_loc_chassis']
                                                                     ['local-chassis'], if_name, chassis_id)
@@ -357,7 +357,7 @@ class LldpSyncDaemon(SonicSyncDaemon):
             if chassis_update != self.chassis_cache:
                 self.db_connector.delete(self.db_connector.APPL_DB,
                                          LldpSyncDaemon.LLDP_LOC_CHASSIS_TABLE)
-                for k, v in list(chassis_update.items()):
+                for k, v in chassis_update.items():
                     self.db_connector.set(self.db_connector.APPL_DB,
                                           LldpSyncDaemon.LLDP_LOC_CHASSIS_TABLE, k, v, blocking=True)
                 logger.debug("sync'd: {}".format(json.dumps(chassis_update, indent=3)))
@@ -375,6 +375,6 @@ class LldpSyncDaemon(SonicSyncDaemon):
                 continue
             # port_table_key = LLDP_ENTRY_TABLE:INTERFACE_NAME;
             table_key = ':'.join([LldpSyncDaemon.LLDP_ENTRY_TABLE, interface])
-            for k, v in list(parsed_update[interface].items()):
+            for k, v in parsed_update[interface].items():
                 self.db_connector.set(self.db_connector.APPL_DB, table_key, k, v, blocking=True)
             logger.debug("sync'd: \n{}".format(json.dumps(parsed_update[interface], indent=3)))
