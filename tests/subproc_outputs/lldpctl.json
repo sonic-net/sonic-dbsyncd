@@ -136,6 +136,7 @@
               "type": "ifname",
               "value": "Ethernet1"
             },
+            "descr": "this is a port description",
             "mfs": "9236"
           },
           "via": "LLDP",
