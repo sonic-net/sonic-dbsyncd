@@ -102,7 +102,7 @@ class SwssSyncClient(mockredis.MockRedis):
         regex = re.compile(regex)
 
         # Find every key that matches the pattern
-        return [key for key in list(self.redis.keys()) if regex.match(key)]
+        return [key for key in self.redis.keys() if regex.match(key)]
 
 
 swsssdk.interface.DBInterface._subscribe_keyspace_notification = _subscribe_keyspace_notification
