@@ -1,10 +1,24 @@
 # MONKEY PATCH!!!
 import json
 import os
+import sys
 
 import mockredis
 import swsssdk.interface
 from swsssdk.interface import redis
+from swsssdk import SonicV2Connector
+
+if sys.version_info >= (3, 0):
+    long = int
+    xrange = range
+    basestring = str
+
+_old_connect_SonicV2Connector = SonicV2Connector.connect
+
+def connect_SonicV2Connector(self, db_name, retry_on=True):
+    self.dbintf.redis_kwargs['db_name'] = db_name
+    self.dbintf.redis_kwargs['decode_responses'] = True
+    _old_connect_SonicV2Connector(self, db_name, retry_on)
 
 
 def _subscribe_keyspace_notification(self, db_name, client):
@@ -38,6 +52,7 @@ class SwssSyncClient(mockredis.MockRedis):
     def __init__(self, *args, **kwargs):
         super(SwssSyncClient, self).__init__(strict=True, *args, **kwargs)
         db = kwargs.pop('db')
+        self.decode_responses = kwargs.pop('decode_responses', False) == True
 
         self.pubsub = MockPubSub()
 
@@ -55,6 +70,17 @@ class SwssSyncClient(mockredis.MockRedis):
                     for k, v in table.items():
                         self.hset(h, k, v)
 
+    # Patch mockredis/mockredis/client.py
+    # The offical implementation assume decode_responses=False
+    # Here we detect the option and decode after doing encode
+    def _encode(self, value):
+        "Return a bytestring representation of the value. Taken from redis-py connection.py"
+
+        value = super(SwssSyncClient, self)._encode(value)
+
+        if self.decode_responses:
+           return value.decode('utf-8')
+    
     # Patch mockredis/mockredis/client.py
     # The official implementation will filter out keys with a slash '/'
     # ref: https://github.com/locationlabs/mockredis/blob/master/mockredis/client.py
@@ -76,9 +102,10 @@ class SwssSyncClient(mockredis.MockRedis):
         regex = re.compile(regex)
 
         # Find every key that matches the pattern
-        return [key for key in self.redis.keys() if regex.match(key.decode('utf-8'))]
+        return [key for key in self.redis.keys() if regex.match(key)]
 
 
 swsssdk.interface.DBInterface._subscribe_keyspace_notification = _subscribe_keyspace_notification
 mockredis.MockRedis.config_set = config_set
 redis.StrictRedis = SwssSyncClient
+SonicV2Connector.connect = connect_SonicV2Connector
