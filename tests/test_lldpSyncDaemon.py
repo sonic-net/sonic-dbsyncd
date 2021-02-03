@@ -14,7 +14,7 @@ import re
 import lldp_syncd
 import lldp_syncd.conventions
 import lldp_syncd.daemon
-from swsssdk import SonicV2Connector, ConfigDBConnector
+from swsssdk import SonicV2Connector
 
 INPUT_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'subproc_outputs')
 
