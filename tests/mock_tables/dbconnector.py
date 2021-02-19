@@ -4,9 +4,12 @@ import os
 import sys
 
 import mockredis
-import swsssdk.interface
-from swsssdk.interface import redis
+import redis
 from swsssdk import SonicV2Connector
+from swsssdk import SonicDBConfig
+from swsssdk.interface import DBInterface
+from swsscommon import swsscommon
+
 
 if sys.version_info >= (3, 0):
     long = int
@@ -79,8 +82,8 @@ class SwssSyncClient(mockredis.MockRedis):
         value = super(SwssSyncClient, self)._encode(value)
 
         if self.decode_responses:
-           return value.decode('utf-8')
-    
+            return value.decode('utf-8')
+
     # Patch mockredis/mockredis/client.py
     # The official implementation will filter out keys with a slash '/'
     # ref: https://github.com/locationlabs/mockredis/blob/master/mockredis/client.py
@@ -105,7 +108,8 @@ class SwssSyncClient(mockredis.MockRedis):
         return [key for key in self.redis.keys() if regex.match(key)]
 
 
-swsssdk.interface.DBInterface._subscribe_keyspace_notification = _subscribe_keyspace_notification
+DBInterface._subscribe_keyspace_notification = _subscribe_keyspace_notification
 mockredis.MockRedis.config_set = config_set
 redis.StrictRedis = SwssSyncClient
 SonicV2Connector.connect = connect_SonicV2Connector
+swsscommon.SonicV2Connector = SonicV2Connector
