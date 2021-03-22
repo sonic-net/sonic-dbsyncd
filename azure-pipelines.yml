@@ -1,0 +1,46 @@
+# Starter pipeline
+# Start with a minimal pipeline that you can customize to build and deploy your code.
+# Add steps that build, run tests, deploy, and more:
+# https://aka.ms/yaml
+
+pool:
+  vmImage: ubuntu-20.04
+
+trigger:
+  branches:
+    include:
+    - master
+
+pr:
+  branches:
+    include:
+    - master
+
+stages:
+- stage: Build
+  jobs:
+  - job:
+    displayName: "build"
+    timeoutInMinutes: 60
+    steps:
+    - checkout: self
+      clean: true
+      submodules: recursive
+      displayName: 'Checkout code'
+    - script: |
+        echo Hello
+        # the following is copied from jenkins
+        # set -ex
+        # ## Build
+        # sudo python3 -m pip install target/python-wheels/*-py3-*.whl
+        # python3 setup.py bdist_wheel
+        # ## Run unit test
+        # ## TODO: add pytest as test requirement, and remove below line
+        # sudo python3 -m pip install pytest>=3.0.5 mockredispy>=2.9.3 mock>=2.0.0
+        # sudo python3 -m pip install dist/sonic_d-2.0.0-py3-none-any.whl
+        # ##sudo python3.6 -m pip install -e ".[testing]"
+        # python3 -m pytest -v
+        # #python3 setup.py test
+    - publish: $(System.DefaultWorkingDirectory)/target/python-wheels/
+      artifact: sonic-dbsyncd
+      displayName: "Archive artifacts"
