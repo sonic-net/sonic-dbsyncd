@@ -261,26 +261,26 @@ class LldpSyncDaemon(SonicSyncDaemon):
                 parsed_interfaces[if_name].update({'lldp_rem_sys_cap_enabled':
                                                    self.parse_sys_capabilities(
                                                        capability_list, enabled=True)})
-                if lldp_json['lldp_loc_chassis']:
-                    loc_chassis_keys = ('lldp_loc_chassis_id_subtype',
-                                        'lldp_loc_chassis_id',
-                                        'lldp_loc_sys_name',
-                                        'lldp_loc_sys_desc',
-                                        'lldp_loc_man_addr')
-                    parsed_chassis = dict(zip(loc_chassis_keys,
-                                         self.parse_chassis(lldp_json['lldp_loc_chassis']
-                                                            ['local-chassis']['chassis'])))
+            if lldp_json['lldp_loc_chassis']:
+                loc_chassis_keys = ('lldp_loc_chassis_id_subtype',
+                                    'lldp_loc_chassis_id',
+                                    'lldp_loc_sys_name',
+                                    'lldp_loc_sys_desc',
+                                    'lldp_loc_man_addr')
+                parsed_chassis = dict(zip(loc_chassis_keys,
+                                     self.parse_chassis(lldp_json['lldp_loc_chassis']
+                                                        ['local-chassis']['chassis'])))
 
-                    loc_capabilities = self.get_sys_capability_list(lldp_json['lldp_loc_chassis']
-                                                                    ['local-chassis'])
-                    # lldpLocSysCapSupported
-                    parsed_chassis.update({'lldp_loc_sys_cap_supported':
-                                          self.parse_sys_capabilities(loc_capabilities)})
-                    # lldpLocSysCapEnabled
-                    parsed_chassis.update({'lldp_loc_sys_cap_enabled':
-                                          self.parse_sys_capabilities(loc_capabilities, enabled=True)})
+                loc_capabilities = self.get_sys_capability_list(lldp_json['lldp_loc_chassis']
+                                                                ['local-chassis'])
+                # lldpLocSysCapSupported
+                parsed_chassis.update({'lldp_loc_sys_cap_supported':
+                                      self.parse_sys_capabilities(loc_capabilities)})
+                # lldpLocSysCapEnabled
+                parsed_chassis.update({'lldp_loc_sys_cap_enabled':
+                                      self.parse_sys_capabilities(loc_capabilities, enabled=True)})
 
-                    parsed_interfaces['local-chassis'].update(parsed_chassis)
+                parsed_interfaces['local-chassis'].update(parsed_chassis)
 
             return parsed_interfaces
         except (KeyError, ValueError):
