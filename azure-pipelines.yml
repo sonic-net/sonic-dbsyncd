@@ -29,6 +29,7 @@ stages:
       displayName: 'Checkout code'
     - script: |
         echo Hello
+        mkdir -p $(System.DefaultWorkingDirectory)/target/python-wheels/
         # the following is copied from jenkins
         # set -ex
         # ## Build
