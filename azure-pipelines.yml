@@ -39,21 +39,13 @@ steps:
     sudo dpkg -i libnl-nf-3-200_*.deb
     sudo dpkg -i libhiredis0.14_*.deb
     sudo dpkg -i libswsscommon_1.0.0_amd64.deb
-    sudo dpkg -i python-swsscommon_1.0.0_amd64.deb
     sudo dpkg -i python3-swsscommon_1.0.0_amd64.deb
   workingDirectory: $(Pipeline.Workspace)/target/debs/buster/
   displayName: 'Install Debian dependencies'
 
 - script: |
     set -xe
-    sudo pip2 install swsssdk-2.0.1-py2-none-any.whl
-    sudo pip2 install sonic_py_common-1.0-py2-none-any.whl
-    sudo pip2 install sonic_config_engine-1.0-py2-none-any.whl
     sudo pip3 install swsssdk-2.0.1-py3-none-any.whl
-    sudo pip3 install sonic_py_common-1.0-py3-none-any.whl
-    sudo pip3 install sonic_yang_mgmt-1.0-py3-none-any.whl
-    sudo pip3 install sonic_yang_models-1.0-py3-none-any.whl
-    sudo pip3 install sonic_config_engine-1.0-py3-none-any.whl
   workingDirectory: $(Pipeline.Workspace)/target/python-wheels/
   displayName: 'Install Python dependencies'
 
@@ -72,7 +64,7 @@ steps:
     python3 setup.py test
   displayName: 'Test Python 3'
 
-- task: PublishTestResults@2
+- task: PublishTestResults@1
   inputs:
     testResultsFiles: '$(System.DefaultWorkingDirectory)/test-results.xml'
     testRunTitle: Python 3
