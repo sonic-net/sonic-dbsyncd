@@ -9,7 +9,7 @@ trigger:
       - '*'
 
 variables:
-  DIFF_COVER_CHECK_THRESHOLD: 0
+  DIFF_COVER_CHECK_THRESHOLD: 70
   DIFF_COVER_ENABLE: 'true'
   DIFF_COVER_WORKING_DIRECTORY: $(System.DefaultWorkingDirectory)
 
