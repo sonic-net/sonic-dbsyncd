@@ -34,7 +34,7 @@ steps:
     artifact: sonic-buildimage.vs
     runVersion: 'latestFromBranch'
     runBranch: 'refs/heads/$(sourceBranch)'
-  displayName: "Download $(sourceBranch) artifacts from sonic-buildimage.vs"
+  displayName: "Download artifacts from latest sonic-buildimage build"
 
 - script: |
     set -xe
