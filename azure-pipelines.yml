@@ -36,14 +36,15 @@ steps:
     artifact: sonic-buildimage.vs
     runVersion: 'latestFromBranch'
     runBranch: 'refs/heads/$(sourceBranch)'
-    patterns: 'libnl-3-200_*.deb
-              libnl-genl-3-200_*.deb
-              libnl-route-3-200_*.deb 
-              **/libnl-nf-3-200_*.deb
-              /**/libhiredis0.14_*.deb
-              libswsscommon_1.0.0_amd64.deb
-              python3-swsscommon_1.0.0_amd64.deb
-              swsssdk-2.0.1-py3-none-any.whl'
+    patterns: |
+      libnl-3-200_*.deb
+      libnl-genl-3-200_*.deb
+      libnl-route-3-200_*.deb 
+      **/libnl-nf-3-200_*.deb
+      /**/libhiredis0.14_*.deb
+      libswsscommon_1.0.0_amd64.deb
+      python3-swsscommon_1.0.0_amd64.deb
+      swsssdk-2.0.1-py3-none-any.whl'
   displayName: "Download artifacts from latest sonic-buildimage build"
 
 - script: |
