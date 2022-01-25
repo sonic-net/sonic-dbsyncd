@@ -9,15 +9,17 @@ trigger:
       - master
       - 20????
 pr:
-- master
-- 20????
+  branches:
+    include:
+      - master
+      - 20????
 schedules:
 - cron: "0 0 * * 0"
   displayName: Weekly Sunday build
   branches:
     include:
-    - master
-    - 20????
+      - master
+      - 20????
   always: true
 
 variables:
@@ -67,7 +69,7 @@ steps:
 
 - script: |
     set -xe
-    sudo pip3 install *.whl
+    sudo pip3 install swsssdk-2.0.1-py3-none-any.whl
   workingDirectory: $(Pipeline.Workspace)/target/python-wheels/buster/
   displayName: 'Install Python dependencies'
 
