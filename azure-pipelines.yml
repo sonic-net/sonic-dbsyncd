@@ -69,7 +69,7 @@ steps:
 
 - script: |
     set -xe
-    sudo pip3 install $(find . -name "swsssdk-2.0.1-py3-none-any.whl")
+    find . -name "swsssdk-2.0.1-py3-none-any.whl" | xargs -i sudo pip3 install {}
   workingDirectory: $(Pipeline.Workspace)/target/
   displayName: 'Install Python dependencies'
 
