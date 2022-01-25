@@ -27,6 +27,7 @@ steps:
     else
       echo "##vso[task.setvariable variable=sourceBranch]$(Build.SourceBranchName)"
     fi
+  displayName: "Get correct artifact downloading branch"
 - task: DownloadPipelineArtifact@2
   inputs:
     source: specific
