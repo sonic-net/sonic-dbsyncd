@@ -50,27 +50,27 @@ steps:
     runVersion: 'latestFromBranch'
     runBranch: 'refs/heads/$(sourceBranch)'
     patterns: |
-      target/debs/buster/libnl-3-200_*.deb
-      target/debs/buster/libnl-genl-3-200_*.deb
-      target/debs/buster/libnl-route-3-200_*.deb
-      target/debs/buster/libnl-nf-3-200_*.deb
-      target/debs/buster/libhiredis0.14_*.deb
-      target/debs/buster/libswsscommon_1.0.0_amd64.deb
-      target/debs/buster/python3-swsscommon_1.0.0_amd64.deb
-      target/python-wheels/buster/swsssdk-2.0.1-py3-none-any.whl
+      target/debs/**/libnl-3-200_*.deb
+      target/debs/**/libnl-genl-3-200_*.deb
+      target/debs/**/libnl-route-3-200_*.deb
+      target/debs/**/libnl-nf-3-200_*.deb
+      target/debs/**/libhiredis0.14_*.deb
+      target/debs/**/libswsscommon_1.0.0_amd64.deb
+      target/debs/**/python3-swsscommon_1.0.0_amd64.deb
+      target/python-wheels/**/swsssdk-2.0.1-py3-none-any.whl
   displayName: "Download artifacts from latest sonic-buildimage build"
 
 - script: |
     set -xe
     sudo apt-get -y purge libhiredis-dev libnl-3-dev libnl-route-3-dev
-    sudo dpkg -i *.deb
-  workingDirectory: $(Pipeline.Workspace)/target/debs/buster/
+    sudo dpkg -i $(find . -name "*.deb")
+  workingDirectory: $(Pipeline.Workspace)/target/
   displayName: 'Install Debian dependencies'
 
 - script: |
     set -xe
-    sudo pip3 install swsssdk-2.0.1-py3-none-any.whl
-  workingDirectory: $(Pipeline.Workspace)/target/python-wheels/buster/
+    sudo pip3 install $(find . -name "swsssdk-2.0.1-py3-none-any.whl")
+  workingDirectory: $(Pipeline.Workspace)/target/
   displayName: 'Install Python dependencies'
 
 - script: |
