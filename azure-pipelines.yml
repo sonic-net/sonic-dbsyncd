@@ -6,8 +6,19 @@
 trigger:
   branches:
     include:
-      - 'master'
-      - '20????'
+      - master
+      - 20????
+pr:
+- master
+- 20????
+schedules:
+- cron: "0 0 * * 0"
+  displayName: Weekly Sunday build
+  branches:
+    include:
+    - master
+    - 20????
+  always: true
 
 variables:
   DIFF_COVER_CHECK_THRESHOLD: 70
