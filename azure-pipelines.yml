@@ -39,7 +39,7 @@ steps:
     patterns: |
       target/debs/buster/libnl-3-200_*.deb
       target/debs/buster/libnl-genl-3-200_*.deb
-      target/debs/buster/libnl-route-3-200_*.deb 
+      target/debs/buster/libnl-route-3-200_*.deb
       target/debs/buster/libnl-nf-3-200_*.deb
       target/debs/buster/libhiredis0.14_*.deb
       target/debs/buster/libswsscommon_1.0.0_amd64.deb
@@ -49,21 +49,14 @@ steps:
 
 - script: |
     set -xe
-    find $(Pipeline.Workspace)/target
     sudo apt-get -y purge libhiredis-dev libnl-3-dev libnl-route-3-dev
-    sudo dpkg -i libnl-3-200_*.deb
-    sudo dpkg -i libnl-genl-3-200_*.deb
-    sudo dpkg -i libnl-route-3-200_*.deb
-    sudo dpkg -i libnl-nf-3-200_*.deb
-    sudo dpkg -i libhiredis0.14_*.deb
-    sudo dpkg -i libswsscommon_1.0.0_amd64.deb
-    sudo dpkg -i python3-swsscommon_1.0.0_amd64.deb
+    sudo dpkg -i *.deb
   workingDirectory: $(Pipeline.Workspace)/target/debs/buster/
   displayName: 'Install Debian dependencies'
 
 - script: |
     set -xe
-    sudo pip3 install swsssdk-2.0.1-py3-none-any.whl
+    sudo pip3 install *.whl
   workingDirectory: $(Pipeline.Workspace)/target/python-wheels/buster/
   displayName: 'Install Python dependencies'
 
