@@ -1,7 +1,6 @@
 from setuptools import setup, find_packages
 
 dependencies = [
-    'swsssdk>=1.3.0',
 ]
 
 test_deps = [
@@ -11,7 +10,6 @@ test_deps = [
 ]
 
 high_performance_deps = [
-    'swsssdk[high_perf]>=1.1',
 ]
 
 setup(
