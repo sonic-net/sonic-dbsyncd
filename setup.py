@@ -6,7 +6,8 @@ dependencies = [
 test_deps = [
     'pytest',
     'mock>=2.0.0',
-    'mockredispy>=2.9.3'
+    'mockredispy>=2.9.3',
+    'swsssdk>=1.3.0'
 ]
 
 high_performance_deps = [
