@@ -1,17 +1,16 @@
 from setuptools import setup, find_packages
 
 dependencies = [
-    'swsssdk>=1.3.0',
 ]
 
 test_deps = [
     'pytest',
     'mock>=2.0.0',
-    'mockredispy>=2.9.3'
+    'mockredispy>=2.9.3',
+    'swsssdk>=1.3.0'
 ]
 
 high_performance_deps = [
-    'swsssdk[high_perf]>=1.1',
 ]
 
 setup(
