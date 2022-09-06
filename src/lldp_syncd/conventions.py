@@ -87,8 +87,8 @@ class LldpSystemCapabilitiesMap(int, Enum):
     other = 0
     repeater = 1
     bridge = 2
-    wlanAccessPoint = 3
+    wlan = 3
     router = 4
-    telephone = 5
-    docsisCableDevice = 6
-    stationOnly = 7
+    tel = 5
+    docsis = 6
+    station = 7

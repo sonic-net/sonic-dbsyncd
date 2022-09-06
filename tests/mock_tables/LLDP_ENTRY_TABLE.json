@@ -1,8 +1,9 @@
 {
   "LLDP_ENTRY_TABLE:Ethernet100": {
+    "lldp_rem_local_port_num": 100,
     "lldp_rem_index": 1,
-    "lldp_rem_sys_cap_enabled": "28 00",
-    "lldp_rem_sys_cap_supported": "28 00",
+    "lldp_rem_sys_cap_enabled": "00 14",
+    "lldp_rem_sys_cap_supported": "00 14",
     "lldp_rem_port_id_subtype": 5,
     "lldp_rem_chassis_id": "00:11:22:33:44:55",
     "lldp_rem_sys_desc": "I'm a little teapot.",
@@ -14,9 +15,10 @@
     "lldp_rem_man_addr": "10.3.147.196"
   },
   "LLDP_ENTRY_TABLE:Ethernet4": {
+    "lldp_rem_local_port_num": 4,
     "lldp_rem_index": 1,
-    "lldp_rem_sys_cap_enabled": "28 00",
-    "lldp_rem_sys_cap_supported": "28 00",
+    "lldp_rem_sys_cap_enabled": "00 14",
+    "lldp_rem_sys_cap_supported": "00 14",
     "lldp_rem_port_id_subtype": 5,
     "lldp_rem_chassis_id": "00:11:22:33:44:55",
     "lldp_rem_sys_desc": "I'm a little teapot.",
@@ -28,9 +30,10 @@
     "lldp_rem_man_addr": "10.3.147.196"
   },
   "LLDP_ENTRY_TABLE:Ethernet104": {
+    "lldp_rem_local_port_num": 104,
     "lldp_rem_index": 1,
-    "lldp_rem_sys_cap_enabled": "28 00",
-    "lldp_rem_sys_cap_supported": "28 00",
+    "lldp_rem_sys_cap_enabled": "00 14",
+    "lldp_rem_sys_cap_supported": "00 14",
     "lldp_rem_port_id_subtype": 5,
     "lldp_rem_chassis_id": "00:11:22:33:44:55",
     "lldp_rem_sys_desc": "I'm a little teapot.",
@@ -42,9 +45,10 @@
     "lldp_rem_man_addr": "10.3.147.196"
   },
   "LLDP_ENTRY_TABLE:Ethernet0": {
+    "lldp_rem_local_port_num": 0,
     "lldp_rem_index": 1,
-    "lldp_rem_sys_cap_enabled": "28 00",
-    "lldp_rem_sys_cap_supported": "28 00",
+    "lldp_rem_sys_cap_enabled": "00 14",
+    "lldp_rem_sys_cap_supported": "00 14",
     "lldp_rem_port_id_subtype": 5,
     "lldp_rem_chassis_id": "00:11:22:33:44:55",
     "lldp_rem_sys_desc": "I'm a little teapot.",
@@ -56,9 +60,10 @@
     "lldp_rem_man_addr": "10.3.147.196"
   },
   "LLDP_ENTRY_TABLE:Ethernet108": {
+    "lldp_rem_local_port_num": 108,
     "lldp_rem_index": 1,
-    "lldp_rem_sys_cap_enabled": "28 00",
-    "lldp_rem_sys_cap_supported": "28 00",
+    "lldp_rem_sys_cap_enabled": "00 14",
+    "lldp_rem_sys_cap_supported": "00 14",
     "lldp_rem_port_id_subtype": 5,
     "lldp_rem_chassis_id": "00:11:22:33:44:55",
     "lldp_rem_sys_desc": "I'm a little teapot.",
@@ -70,9 +75,10 @@
     "lldp_rem_man_addr": "10.3.147.196"
   },
   "LLDP_ENTRY_TABLE:Ethernet8": {
+    "lldp_rem_local_port_num": 8,
     "lldp_rem_index": 1,
-    "lldp_rem_sys_cap_enabled": "28 00",
-    "lldp_rem_sys_cap_supported": "28 00",
+    "lldp_rem_sys_cap_enabled": "00 14",
+    "lldp_rem_sys_cap_supported": "00 14",
     "lldp_rem_port_id_subtype": 5,
     "lldp_rem_chassis_id": "00:11:22:33:44:55",
     "lldp_rem_sys_desc": "I'm a little teapot.",
@@ -84,6 +90,7 @@
     "lldp_rem_man_addr": "10.3.147.196"
   },
   "LLDP_ENTRY_TABLE:Ethernet96": {
+    "lldp_rem_local_port_num": 96,
     "lldp_rem_index": 1,
     "lldp_rem_sys_cap_enabled": "",
     "lldp_rem_sys_cap_supported": "",
@@ -98,9 +105,10 @@
     "lldp_rem_man_addr": ""
   },
   "LLDP_ENTRY_TABLE:Ethernet92": {
+    "lldp_rem_local_port_num": 92,
     "lldp_rem_index": 1,
-    "lldp_rem_sys_cap_enabled": "28 00",
-    "lldp_rem_sys_cap_supported": "28 00",
+    "lldp_rem_sys_cap_enabled": "00 14",
+    "lldp_rem_sys_cap_supported": "00 14",
     "lldp_rem_port_id_subtype": 5,
     "lldp_rem_chassis_id": "00:11:22:33:44:55",
     "lldp_rem_sys_desc": "I'm a little teapot.",
@@ -112,9 +120,10 @@
     "lldp_rem_man_addr": "10.3.147.196"
   },
   "LLDP_ENTRY_TABLE:Ethernet124": {
+    "lldp_rem_local_port_num": 124,
     "lldp_rem_index": 1,
-    "lldp_rem_sys_cap_enabled": "28 00",
-    "lldp_rem_sys_cap_supported": "28 00",
+    "lldp_rem_sys_cap_enabled": "00 14",
+    "lldp_rem_sys_cap_supported": "00 14",
     "lldp_rem_port_id_subtype": 5,
     "lldp_rem_chassis_id": "00:11:22:33:44:55",
     "lldp_rem_sys_desc": "I'm a little teapot.",
@@ -126,9 +135,10 @@
     "lldp_rem_man_addr": "10.3.147.196"
   },
   "LLDP_ENTRY_TABLE:Ethernet120": {
+    "lldp_rem_local_port_num": 120,
     "lldp_rem_index": 1,
-    "lldp_rem_sys_cap_enabled": "28 00",
-    "lldp_rem_sys_cap_supported": "28 00",
+    "lldp_rem_sys_cap_enabled": "00 14",
+    "lldp_rem_sys_cap_supported": "00 14",
     "lldp_rem_port_id_subtype": 5,
     "lldp_rem_chassis_id": "00:11:22:33:44:55",
     "lldp_rem_sys_desc": "I'm a little teapot.",
@@ -140,9 +150,10 @@
     "lldp_rem_man_addr": "10.3.147.196"
   },
   "LLDP_ENTRY_TABLE:Ethernet40": {
+    "lldp_rem_local_port_num": 40,
     "lldp_rem_index": 1,
-    "lldp_rem_sys_cap_enabled": "28 00",
-    "lldp_rem_sys_cap_supported": "28 00",
+    "lldp_rem_sys_cap_enabled": "00 14",
+    "lldp_rem_sys_cap_supported": "00 14",
     "lldp_rem_port_id_subtype": 5,
     "lldp_rem_chassis_id": "00:11:22:33:44:55",
     "lldp_rem_sys_desc": "I'm a little teapot.",
@@ -154,9 +165,10 @@
     "lldp_rem_man_addr": "10.3.147.196"
   },
   "LLDP_ENTRY_TABLE:Ethernet44": {
+    "lldp_rem_local_port_num": 44,
     "lldp_rem_index": 1,
-    "lldp_rem_sys_cap_enabled": "28 00",
-    "lldp_rem_sys_cap_supported": "28 00",
+    "lldp_rem_sys_cap_enabled": "00 14",
+    "lldp_rem_sys_cap_supported": "00 14",
     "lldp_rem_port_id_subtype": 5,
     "lldp_rem_chassis_id": "00:11:22:33:44:55",
     "lldp_rem_sys_desc": "I'm a little teapot.",
@@ -168,9 +180,10 @@
     "lldp_rem_man_addr": "10.3.147.196"
   },
   "LLDP_ENTRY_TABLE:Ethernet48": {
+    "lldp_rem_local_port_num": 48,
     "lldp_rem_index": 1,
-    "lldp_rem_sys_cap_enabled": "28 00",
-    "lldp_rem_sys_cap_supported": "28 00",
+    "lldp_rem_sys_cap_enabled": "00 14",
+    "lldp_rem_sys_cap_supported": "00 14",
     "lldp_rem_port_id_subtype": 5,
     "lldp_rem_chassis_id": "00:11:22:33:44:55",
     "lldp_rem_sys_desc": "I'm a little teapot.",
@@ -182,9 +195,10 @@
     "lldp_rem_man_addr": "10.3.147.196"
   },
   "LLDP_ENTRY_TABLE:Ethernet24": {
+    "lldp_rem_local_port_num": 24,
     "lldp_rem_index": 1,
-    "lldp_rem_sys_cap_enabled": "28 00",
-    "lldp_rem_sys_cap_supported": "28 00",
+    "lldp_rem_sys_cap_enabled": "00 14",
+    "lldp_rem_sys_cap_supported": "00 14",
     "lldp_rem_port_id_subtype": 5,
     "lldp_rem_chassis_id": "00:11:22:33:44:55",
     "lldp_rem_sys_desc": "I'm a little teapot.",
@@ -196,9 +210,10 @@
     "lldp_rem_man_addr": "10.3.147.196"
   },
   "LLDP_ENTRY_TABLE:Ethernet68": {
+    "lldp_rem_local_port_num": 68,
     "lldp_rem_index": 1,
-    "lldp_rem_sys_cap_enabled": "28 00",
-    "lldp_rem_sys_cap_supported": "28 00",
+    "lldp_rem_sys_cap_enabled": "00 14",
+    "lldp_rem_sys_cap_supported": "00 14",
     "lldp_rem_port_id_subtype": 5,
     "lldp_rem_chassis_id": "00:11:22:33:44:55",
     "lldp_rem_sys_desc": "I'm a little teapot.",
@@ -210,9 +225,10 @@
     "lldp_rem_man_addr": "10.3.147.196"
   },
   "LLDP_ENTRY_TABLE:eth0": {
+    "lldp_rem_local_port_num": 10000,
     "lldp_rem_index": 2,
-    "lldp_rem_sys_cap_enabled": "28 00",
-    "lldp_rem_sys_cap_supported": "28 00",
+    "lldp_rem_sys_cap_enabled": "00 14",
+    "lldp_rem_sys_cap_supported": "00 14",
     "lldp_rem_port_id_subtype": 5,
     "lldp_rem_chassis_id": "00:11:22:33:44:55",
     "lldp_rem_sys_desc": "I'm going to need you to come in on saturday",
@@ -224,9 +240,10 @@
     "lldp_rem_man_addr": ""
   },
   "LLDP_ENTRY_TABLE:Ethernet20": {
+    "lldp_rem_local_port_num": 20,
     "lldp_rem_index": 1,
-    "lldp_rem_sys_cap_enabled": "28 00",
-    "lldp_rem_sys_cap_supported": "28 00",
+    "lldp_rem_sys_cap_enabled": "00 14",
+    "lldp_rem_sys_cap_supported": "00 14",
     "lldp_rem_port_id_subtype": 5,
     "lldp_rem_chassis_id": "00:11:22:33:44:55",
     "lldp_rem_sys_desc": "I'm a little teapot.",
@@ -238,9 +255,10 @@
     "lldp_rem_man_addr": "10.3.147.196"
   },
   "LLDP_ENTRY_TABLE:Ethernet60": {
+    "lldp_rem_local_port_num": 60,
     "lldp_rem_index": 1,
-    "lldp_rem_sys_cap_enabled": "28 00",
-    "lldp_rem_sys_cap_supported": "28 00",
+    "lldp_rem_sys_cap_enabled": "00 14",
+    "lldp_rem_sys_cap_supported": "00 14",
     "lldp_rem_port_id_subtype": 5,
     "lldp_rem_chassis_id": "00:11:22:33:44:55",
     "lldp_rem_sys_desc": "I'm a little teapot.",
@@ -252,9 +270,10 @@
     "lldp_rem_man_addr": "10.3.147.196"
   },
   "LLDP_ENTRY_TABLE:Ethernet64": {
+    "lldp_rem_local_port_num": 64,
     "lldp_rem_index": 1,
-    "lldp_rem_sys_cap_enabled": "28 00",
-    "lldp_rem_sys_cap_supported": "28 00",
+    "lldp_rem_sys_cap_enabled": "00 14",
+    "lldp_rem_sys_cap_supported": "00 14",
     "lldp_rem_port_id_subtype": 5,
     "lldp_rem_chassis_id": "00:11:22:33:44:55",
     "lldp_rem_sys_desc": "I'm a little teapot.",
@@ -266,9 +285,10 @@
     "lldp_rem_man_addr": "10.3.147.196"
   },
   "LLDP_ENTRY_TABLE:Ethernet112": {
+    "lldp_rem_local_port_num": 112,
     "lldp_rem_index": 1,
-    "lldp_rem_sys_cap_enabled": "28 00",
-    "lldp_rem_sys_cap_supported": "28 00",
+    "lldp_rem_sys_cap_enabled": "00 14",
+    "lldp_rem_sys_cap_supported": "00 14",
     "lldp_rem_port_id_subtype": 5,
     "lldp_rem_chassis_id": "00:11:22:33:44:55",
     "lldp_rem_sys_desc": "I'm a little teapot.",
@@ -280,9 +300,10 @@
     "lldp_rem_man_addr": "10.3.147.196"
   },
   "LLDP_ENTRY_TABLE:Ethernet116": {
+    "lldp_rem_local_port_num": 116,
     "lldp_rem_index": 1,
-    "lldp_rem_sys_cap_enabled": "28 00",
-    "lldp_rem_sys_cap_supported": "28 00",
+    "lldp_rem_sys_cap_enabled": "00 14",
+    "lldp_rem_sys_cap_supported": "00 14",
     "lldp_rem_port_id_subtype": 5,
     "lldp_rem_chassis_id": "00:11:22:33:44:55",
     "lldp_rem_sys_desc": "I'm a little teapot.",
@@ -294,9 +315,10 @@
     "lldp_rem_man_addr": "10.3.147.196"
   },
   "LLDP_ENTRY_TABLE:Ethernet84": {
+    "lldp_rem_local_port_num": 84,
     "lldp_rem_index": 1,
-    "lldp_rem_sys_cap_enabled": "28 00",
-    "lldp_rem_sys_cap_supported": "28 00",
+    "lldp_rem_sys_cap_enabled": "00 14",
+    "lldp_rem_sys_cap_supported": "00 14",
     "lldp_rem_port_id_subtype": 5,
     "lldp_rem_chassis_id": "00:11:22:33:44:55",
     "lldp_rem_sys_desc": "I'm a little teapot.",
@@ -308,9 +330,10 @@
     "lldp_rem_man_addr": "10.3.147.196"
   },
   "LLDP_ENTRY_TABLE:Ethernet80": {
+    "lldp_rem_local_port_num": 80,
     "lldp_rem_index": 1,
-    "lldp_rem_sys_cap_enabled": "28 00",
-    "lldp_rem_sys_cap_supported": "28 00",
+    "lldp_rem_sys_cap_enabled": "00 14",
+    "lldp_rem_sys_cap_supported": "00 14",
     "lldp_rem_port_id_subtype": 5,
     "lldp_rem_chassis_id": "00:11:22:33:44:55",
     "lldp_rem_sys_desc": "I'm a little teapot.",
@@ -322,9 +345,10 @@
     "lldp_rem_man_addr": "10.3.147.196"
   },
   "LLDP_ENTRY_TABLE:Ethernet88": {
+    "lldp_rem_local_port_num": 88,
     "lldp_rem_index": 1,
-    "lldp_rem_sys_cap_enabled": "28 00",
-    "lldp_rem_sys_cap_supported": "28 00",
+    "lldp_rem_sys_cap_enabled": "00 14",
+    "lldp_rem_sys_cap_supported": "00 14",
     "lldp_rem_port_id_subtype": 5,
     "lldp_rem_chassis_id": "00:11:22:33:44:55",
     "lldp_rem_sys_desc": "I'm a little teapot.",
@@ -336,9 +360,10 @@
     "lldp_rem_man_addr": "10.3.147.196"
   },
   "LLDP_ENTRY_TABLE:Ethernet52": {
+    "lldp_rem_local_port_num": 52,
     "lldp_rem_index": 1,
-    "lldp_rem_sys_cap_enabled": "28 00",
-    "lldp_rem_sys_cap_supported": "28 00",
+    "lldp_rem_sys_cap_enabled": "00 14",
+    "lldp_rem_sys_cap_supported": "00 14",
     "lldp_rem_port_id_subtype": 5,
     "lldp_rem_chassis_id": "00:11:22:33:44:55",
     "lldp_rem_sys_desc": "I'm a little teapot.",
@@ -350,9 +375,10 @@
     "lldp_rem_man_addr": "10.3.147.196"
   },
   "LLDP_ENTRY_TABLE:Ethernet76": {
+    "lldp_rem_local_port_num": 76,
     "lldp_rem_index": 1,
-    "lldp_rem_sys_cap_enabled": "28 00",
-    "lldp_rem_sys_cap_supported": "28 00",
+    "lldp_rem_sys_cap_enabled": "00 14",
+    "lldp_rem_sys_cap_supported": "00 14",
     "lldp_rem_port_id_subtype": 5,
     "lldp_rem_chassis_id": "00:11:22:33:44:55",
     "lldp_rem_sys_desc": "I'm a little teapot.",
@@ -364,9 +390,10 @@
     "lldp_rem_man_addr": "10.3.147.196"
   },
   "LLDP_ENTRY_TABLE:Ethernet56": {
+    "lldp_rem_local_port_num": 56,
     "lldp_rem_index": 1,
-    "lldp_rem_sys_cap_enabled": "28 00",
-    "lldp_rem_sys_cap_supported": "28 00",
+    "lldp_rem_sys_cap_enabled": "00 14",
+    "lldp_rem_sys_cap_supported": "00 14",
     "lldp_rem_port_id_subtype": 5,
     "lldp_rem_chassis_id": "00:11:22:33:44:55",
     "lldp_rem_sys_desc": "I'm a little teapot.",
@@ -378,9 +405,10 @@
     "lldp_rem_man_addr": "10.3.147.196"
   },
   "LLDP_ENTRY_TABLE:Ethernet72": {
+    "lldp_rem_local_port_num": 72,
     "lldp_rem_index": 1,
-    "lldp_rem_sys_cap_enabled": "28 00",
-    "lldp_rem_sys_cap_supported": "28 00",
+    "lldp_rem_sys_cap_enabled": "00 14",
+    "lldp_rem_sys_cap_supported": "00 14",
     "lldp_rem_port_id_subtype": 5,
     "lldp_rem_chassis_id": "00:11:22:33:44:55",
     "lldp_rem_sys_desc": "I'm a little teapot.",
@@ -392,9 +420,10 @@
     "lldp_rem_man_addr": "10.3.147.196"
   },
   "LLDP_ENTRY_TABLE:Ethernet32": {
+    "lldp_rem_local_port_num": 32,
     "lldp_rem_index": 1,
-    "lldp_rem_sys_cap_enabled": "28 00",
-    "lldp_rem_sys_cap_supported": "28 00",
+    "lldp_rem_sys_cap_enabled": "00 14",
+    "lldp_rem_sys_cap_supported": "00 14",
     "lldp_rem_port_id_subtype": 5,
     "lldp_rem_chassis_id": "00:11:22:33:44:55",
     "lldp_rem_sys_desc": "I'm a little teapot.",
@@ -406,9 +435,10 @@
     "lldp_rem_man_addr": "10.3.147.196"
   },
   "LLDP_ENTRY_TABLE:Ethernet28": {
+    "lldp_rem_local_port_num": 28,
     "lldp_rem_index": 1,
-    "lldp_rem_sys_cap_enabled": "28 00",
-    "lldp_rem_sys_cap_supported": "28 00",
+    "lldp_rem_sys_cap_enabled": "00 14",
+    "lldp_rem_sys_cap_supported": "00 14",
     "lldp_rem_port_id_subtype": 5,
     "lldp_rem_chassis_id": "00:11:22:33:44:55",
     "lldp_rem_sys_desc": "I'm a little teapot.",
@@ -420,9 +450,10 @@
     "lldp_rem_man_addr": "10.3.147.196"
   },
   "LLDP_ENTRY_TABLE:Ethernet36": {
+    "lldp_rem_local_port_num": 36,
     "lldp_rem_index": 1,
-    "lldp_rem_sys_cap_enabled": "28 00",
-    "lldp_rem_sys_cap_supported": "28 00",
+    "lldp_rem_sys_cap_enabled": "00 14",
+    "lldp_rem_sys_cap_supported": "00 14",
     "lldp_rem_port_id_subtype": 5,
     "lldp_rem_chassis_id": "00:11:22:33:44:55",
     "lldp_rem_sys_desc": "I'm a little teapot.",
@@ -434,9 +465,10 @@
     "lldp_rem_man_addr": "10.3.147.196"
   },
   "LLDP_ENTRY_TABLE:Ethernet16": {
+    "lldp_rem_local_port_num": 16,
     "lldp_rem_index": 1,
-    "lldp_rem_sys_cap_enabled": "28 00",
-    "lldp_rem_sys_cap_supported": "28 00",
+    "lldp_rem_sys_cap_enabled": "00 14",
+    "lldp_rem_sys_cap_supported": "00 14",
     "lldp_rem_port_id_subtype": 5,
     "lldp_rem_chassis_id": "00:11:22:33:44:55",
     "lldp_rem_sys_desc": "I'm a little teapot.",
@@ -448,9 +480,10 @@
     "lldp_rem_man_addr": "10.3.147.196"
   },
   "LLDP_ENTRY_TABLE:Ethernet12": {
+    "lldp_rem_local_port_num": 12,
     "lldp_rem_index": 1,
-    "lldp_rem_sys_cap_enabled": "28 00",
-    "lldp_rem_sys_cap_supported": "28 00",
+    "lldp_rem_sys_cap_enabled": "00 14",
+    "lldp_rem_sys_cap_supported": "00 14",
     "lldp_rem_port_id_subtype": 5,
     "lldp_rem_chassis_id": "00:11:22:33:44:55",
     "lldp_rem_sys_desc": "I'm a little teapot.",
@@ -467,7 +500,7 @@
     "lldp_loc_sys_name": "arc-switch1025",
     "lldp_loc_sys_desc": "Debian GNU/Linux 8 (jessie) Linux 3.16.0-5-amd64 #1 SMP Debian 3.16.51-3+deb8u1 (2018-01-08) x86_64",
     "lldp_loc_man_addr": "10.1.0.32,fc00:1::32",
-    "lldp_loc_sys_cap_supported": "28 00",
-    "lldp_loc_sys_cap_enabled": "28 00"
+    "lldp_loc_sys_cap_supported": "00 14",
+    "lldp_loc_sys_cap_enabled": "00 14"
   }
 }
