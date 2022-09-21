@@ -19,14 +19,6 @@
             {
               "type": "Router",
               "enabled": true
-            },
-            {
-              "type": "Wlan",
-              "enabled": false
-            },
-            {
-              "type": "Station",
-              "enabled": false
             }
           ],
           "descr": "Debian GNU/Linux 8 (jessie) Linux 3.16.0-5-amd64 #1 SMP Debian 3.16.51-3+deb8u1 (2018-01-08) x86_64",

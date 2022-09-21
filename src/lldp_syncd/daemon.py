@@ -148,10 +148,10 @@ class LldpSyncDaemon(SonicSyncDaemon):
         for capability in capability_list:
             try:
                 if (not enabled) or capability["enabled"]:
-                    sys_cap |= 128 >> LldpSystemCapabilitiesMap[capability["type"].lower()]
+                    sys_cap |= 1 << LldpSystemCapabilitiesMap[capability["type"].lower()]
             except KeyError:
                 logger.debug("Unknown capability {}".format(capability["type"]))
-        return "%0.2X 00" % sys_cap
+        return "00 %0.2X" % sys_cap
 
     def __init__(self, update_interval=None):
         super(LldpSyncDaemon, self).__init__()
