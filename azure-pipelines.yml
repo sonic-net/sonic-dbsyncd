@@ -11,10 +11,10 @@ trigger:
 stages:
 - ${{ if eq(variables['Build.Reason'], 'PullRequest') }}:
   - stage: Analysis
+    dependsOn: []
     jobs:
     - job:
       displayName: "Semgrep"
-      continueOnError: false
       pool:
         vmImage: ubuntu-latest
       steps:
