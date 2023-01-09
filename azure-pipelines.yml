@@ -15,7 +15,6 @@ stages:
     jobs:
     - job:
       displayName: "Semgrep"
-      continueOnError: false
       pool:
         vmImage: ubuntu-latest
       steps:
