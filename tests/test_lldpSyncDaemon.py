@@ -98,6 +98,7 @@ class TestLldpSyncDaemon(TestCase):
     def test_timeparse(self):
         self.assertEqual(lldp_syncd.daemon.parse_time("0 day, 05:09:02"), make_seconds(0, 5, 9, 2))
         self.assertEqual(lldp_syncd.daemon.parse_time("2 days, 05:59:02"), make_seconds(2, 5, 59, 2))
+        self.assertEqual(lldp_syncd.daemon.parse_time("-2 days, -23:-55:-02"), make_seconds(0, 0, 0, 0))
 
     def parse_mgmt_ip(self, json_file):
         parsed_update = self.daemon.parse_update(json_file)
