@@ -50,6 +50,9 @@ class TestLldpSyncDaemon(TestCase):
         with open(os.path.join(INPUT_DIR, 'interface_only.json')) as f:
             self._interface_only = json.load(f)
 
+        with open(os.path.join(INPUT_DIR, 'lldpctl_no_neighbors_loc_mgmt_ip.json')) as f:
+            self._no_neighbors_loc_mgmt_ip = json.load(f)
+
         self.daemon = lldp_syncd.LldpSyncDaemon()
 
     def test_parse_json(self):
@@ -115,6 +118,9 @@ class TestLldpSyncDaemon(TestCase):
 
     def test_single_mgmt_ip(self):
         self.parse_mgmt_ip(self._single_loc_mgmt_ip)
+
+    def test_local_mgmt_ip_no_neighbors(self):
+        self.parse_mgmt_ip(self._no_neighbors_loc_mgmt_ip)
 
     def test_loc_chassis(self):
         parsed_update = self.daemon.parse_update(self._json)
