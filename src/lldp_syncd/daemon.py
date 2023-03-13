@@ -44,12 +44,16 @@ def parse_time(time_str):
     }
     :return: parsed age in time ticks (or seconds)
     """
-    days, hour_min_secs = re.split(LLDPD_UPTIME_RE_SPLIT_PATTERN, time_str)
-    struct_time = time.strptime(hour_min_secs, LLDPD_TIME_FORMAT)
-    time_delta = datetime.timedelta(days=int(days), hours=struct_time.tm_hour,
-                                    minutes=struct_time.tm_min,
-                                    seconds=struct_time.tm_sec)
-    return int(time_delta.total_seconds())
+    try:
+        days, hour_min_secs = re.split(LLDPD_UPTIME_RE_SPLIT_PATTERN, time_str)
+        struct_time = time.strptime(hour_min_secs, LLDPD_TIME_FORMAT)
+        time_delta = datetime.timedelta(days=int(days), hours=struct_time.tm_hour,
+                                        minutes=struct_time.tm_min,
+                                        seconds=struct_time.tm_sec)
+        return int(time_delta.total_seconds())
+    except ValueError:
+        logger.exception("Failed to parse lldp age {} -- ".format(time_str))
+    return 0
 
 
 class LldpSyncDaemon(SonicSyncDaemon):
@@ -264,7 +268,7 @@ class LldpSyncDaemon(SonicSyncDaemon):
                 parsed_interfaces[if_name].update({'lldp_rem_sys_cap_enabled':
                                                    self.parse_sys_capabilities(
                                                        capability_list, enabled=True)})
-            if lldp_json['lldp_loc_chassis']:
+            if lldp_json.get('lldp_loc_chassis'):
                 loc_chassis_keys = ('lldp_loc_chassis_id_subtype',
                                     'lldp_loc_chassis_id',
                                     'lldp_loc_sys_name',
