@@ -128,7 +128,13 @@ class LldpSyncDaemon(SonicSyncDaemon):
             if 'capability' in if_attributes['chassis']:
                 capability_list = if_attributes['chassis']['capability']
             else:
-                capability_list = list(if_attributes['chassis'].values())[0]['capability']
+                for attribute in if_attributes['chassis'].values():
+                    if 'capability' in attribute:
+                        capability_list = attribute['capability']
+                        break
+                else:
+                    capability_list = []
+
             # {'enabled': ..., 'type': 'capability'}
             if isinstance(capability_list, dict):
                 capability_list = [capability_list]

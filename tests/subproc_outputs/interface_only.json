@@ -45,6 +45,29 @@
         }
       },
       {
+        "Ethernet1": {
+          "via": "LLDP",
+          "rid": "8",
+          "age": "0 day, 00:00:01",
+          "chassis": {
+            "id": {
+              "type": "local",
+              "value": "55663150-3630-2543-4A30-323230424734"
+            },
+            "descr": "I'm a little teapot.",
+            "mgmt-ip": "0.0.0.0"
+          },
+          "port": {
+            "id": {
+              "type": "mac",
+              "value": "cc:12:33:44:55:66"
+            },
+            "descr": "PCI-E Slot 3, Port 1",
+            "ttl": "100"
+          }
+        }
+      },
+      {
         "Ethernet100": {
           "rid": "1",
           "port": {
