@@ -194,6 +194,8 @@ class LldpSyncDaemon(SonicSyncDaemon):
         logger.debug("Invoking lldpcli with: {}".format(cmd_local))
 
         lldp_json = self._scrap_output(cmd)
+        if lldp_json is None:
+            return None
         lldp_json['lldp_loc_chassis'] = self._scrap_output(cmd_local)
 
         return lldp_json
