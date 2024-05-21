@@ -28,7 +28,7 @@ steps:
     artifact: sonic-buildimage.vs
     runVersion: 'latestFromBranch'
     runBranch: 'refs/heads/master'
-    pattern: |
+    patterns: |
       target/debs/buster/*.deb
       target/python-wheels/buster/*.whl
   displayName: "Download artifacts from latest sonic-buildimage build"
