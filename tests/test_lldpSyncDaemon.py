@@ -179,3 +179,42 @@ class TestLldpSyncDaemon(TestCase):
                     jo[k] = db.get_all(db.APPL_DB, k)
         if 'LLDP_ENTRY_TABLE:Ethernet104' in jo:
             self.fail("After removing Ethernet104, it is still found in APPL_DB!")
+
+    @mock.patch('subprocess.check_output')
+    def test_invalid_chassis_name(self, mock_check_output):
+        # mock the invalid chassis name
+        mock_check_output.return_value = '''
+        {
+            "local-chassis": {
+                "chassis": {
+                    "chassis_name\1": {
+                        "id": {
+                        "type": "mac",
+                        "value": "aa:bb:cc:dd:ee:ff"
+                        },
+                        "descr": "SONiC Software Version: SONiC.20230531.22",
+                        "capability": [
+                            {
+                                "type": "Bridge",
+                                "enabled": true
+                            },
+                            {
+                                "type": "Router",
+                                "enabled": true
+                            },
+                            {
+                                "type": "Wlan",
+                                "enabled": false
+                            },
+                            {
+                                "type": "Station",
+                                "enabled": false
+                            }
+                        ]
+                    }
+                }
+            }
+        }
+        '''
+        result = self.daemon.source_update()
+        self.assertIsNone(result)
