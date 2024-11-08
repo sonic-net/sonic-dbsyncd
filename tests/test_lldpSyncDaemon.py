@@ -2,6 +2,7 @@ import os
 import sys
 # noinspection PyUnresolvedReferences
 import tests.mock_tables.dbconnector
+import time
 
 
 modules_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -14,7 +15,7 @@ import re
 import lldp_syncd
 import lldp_syncd.conventions
 import lldp_syncd.daemon
-from swsssdk import SonicV2Connector
+from swsscommon.swsscommon import SonicV2Connector
 
 INPUT_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'subproc_outputs')
 
@@ -98,6 +99,7 @@ class TestLldpSyncDaemon(TestCase):
     def test_timeparse(self):
         self.assertEqual(lldp_syncd.daemon.parse_time("0 day, 05:09:02"), make_seconds(0, 5, 9, 2))
         self.assertEqual(lldp_syncd.daemon.parse_time("2 days, 05:59:02"), make_seconds(2, 5, 59, 2))
+        self.assertEqual(lldp_syncd.daemon.parse_time("-2 days, -23:-55:-02"), make_seconds(0, 0, 0, 0))
 
     def parse_mgmt_ip(self, json_file):
         parsed_update = self.daemon.parse_update(json_file)
@@ -136,3 +138,83 @@ class TestLldpSyncDaemon(TestCase):
             (if_name, if_attributes), = interface.items()
             capability_list = self.daemon.get_sys_capability_list(if_attributes, if_name, "fake_chassis_id")
             self.assertNotEqual(capability_list, [])
+
+    def test_changed_deleted_interface(self):
+        parsed_update = self.daemon.parse_update(self._json)
+        self.daemon.sync(parsed_update)
+        db = create_dbconnector()
+        keys = db.keys(db.APPL_DB)
+        # Check if each lldp_rem_time_mark is changed
+        dump = {}
+        for k in keys:
+            if k != 'LLDP_LOC_CHASSIS':
+                if 'eth0' in k or 'Ethernet0' in k:
+                    dump[k] = db.get(db.APPL_DB, k, 'lldp_rem_time_mark')
+                elif 'Ethernet100' in k:
+                    dump[k] = db.get(db.APPL_DB, k, 'lldp_rem_port_desc')
+
+        time.sleep(1)
+        # simulate lldp_rem_time_mark was changed or port description was changed or interface was removed
+        changed_json = self._json.copy()
+        changed_json['lldp']['interface'][0]['eth0']['age'] = '0 day, 05:09:12'
+        changed_json['lldp']['interface'][1]['Ethernet0']['age'] = '0 day, 05:09:15'
+        changed_json['lldp']['interface'][2]['Ethernet100']['port']['descr'] = "I'm a little teapot, too."
+        changed_json['lldp']['interface'].pop(3) # Remove interface Ethernet104
+
+        parsed_update = self.daemon.parse_update(changed_json)
+        self.daemon.sync(parsed_update)
+        keys = db.keys(db.APPL_DB)
+
+        jo = {}
+        for k in keys:
+            if k != 'LLDP_LOC_CHASSIS':
+                if 'eth0' in k or 'Ethernet0' in k:
+                    jo[k] = db.get(db.APPL_DB, k, 'lldp_rem_time_mark')
+                    self.assertEqual(int(jo[k]), int(dump[k])+10)
+                elif 'Ethernet100' in k:
+                    jo[k] = db.get(db.APPL_DB, k, 'lldp_rem_port_desc')
+                    self.assertEqual(dump[k], "")
+                    self.assertEqual(jo[k], "I'm a little teapot, too.")
+                else:
+                    jo[k] = db.get_all(db.APPL_DB, k)
+        if 'LLDP_ENTRY_TABLE:Ethernet104' in jo:
+            self.fail("After removing Ethernet104, it is still found in APPL_DB!")
+
+    @mock.patch('subprocess.check_output')
+    def test_invalid_chassis_name(self, mock_check_output):
+        # mock the invalid chassis name
+        mock_check_output.return_value = '''
+        {
+            "local-chassis": {
+                "chassis": {
+                    "chassis_name\1": {
+                        "id": {
+                        "type": "mac",
+                        "value": "aa:bb:cc:dd:ee:ff"
+                        },
+                        "descr": "SONiC Software Version: SONiC.20230531.22",
+                        "capability": [
+                            {
+                                "type": "Bridge",
+                                "enabled": true
+                            },
+                            {
+                                "type": "Router",
+                                "enabled": true
+                            },
+                            {
+                                "type": "Wlan",
+                                "enabled": false
+                            },
+                            {
+                                "type": "Station",
+                                "enabled": false
+                            }
+                        ]
+                    }
+                }
+            }
+        }
+        '''
+        result = self.daemon.source_update()
+        self.assertIsNone(result)

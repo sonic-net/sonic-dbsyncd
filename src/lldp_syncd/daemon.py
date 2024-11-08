@@ -44,12 +44,16 @@ def parse_time(time_str):
     }
     :return: parsed age in time ticks (or seconds)
     """
-    days, hour_min_secs = re.split(LLDPD_UPTIME_RE_SPLIT_PATTERN, time_str)
-    struct_time = time.strptime(hour_min_secs, LLDPD_TIME_FORMAT)
-    time_delta = datetime.timedelta(days=int(days), hours=struct_time.tm_hour,
-                                    minutes=struct_time.tm_min,
-                                    seconds=struct_time.tm_sec)
-    return int(time_delta.total_seconds())
+    try:
+        days, hour_min_secs = re.split(LLDPD_UPTIME_RE_SPLIT_PATTERN, time_str)
+        struct_time = time.strptime(hour_min_secs, LLDPD_TIME_FORMAT)
+        time_delta = datetime.timedelta(days=int(days), hours=struct_time.tm_hour,
+                                        minutes=struct_time.tm_min,
+                                        seconds=struct_time.tm_sec)
+        return int(time_delta.total_seconds())
+    except ValueError:
+        logger.exception("Failed to parse lldp age {} -- ".format(time_str))
+    return 0
 
 
 class LldpSyncDaemon(SonicSyncDaemon):
@@ -190,6 +194,8 @@ class LldpSyncDaemon(SonicSyncDaemon):
         logger.debug("Invoking lldpcli with: {}".format(cmd_local))
 
         lldp_json = self._scrap_output(cmd)
+        if lldp_json is None:
+            return None
         lldp_json['lldp_loc_chassis'] = self._scrap_output(cmd_local)
 
         return lldp_json
@@ -264,7 +270,7 @@ class LldpSyncDaemon(SonicSyncDaemon):
                 parsed_interfaces[if_name].update({'lldp_rem_sys_cap_enabled':
                                                    self.parse_sys_capabilities(
                                                        capability_list, enabled=True)})
-            if lldp_json['lldp_loc_chassis']:
+            if lldp_json.get('lldp_loc_chassis'):
                 loc_chassis_keys = ('lldp_loc_chassis_id_subtype',
                                     'lldp_loc_chassis_id',
                                     'lldp_loc_sys_name',
@@ -345,6 +351,26 @@ class LldpSyncDaemon(SonicSyncDaemon):
 
         return new_keys, changed_keys, deleted_keys
 
+    def is_only_time_mark_modified(self, cached_interface, updated_interface):
+        """
+        Check if only lldp_rem_time_mark is modified in the update
+        :param cached_interface: Local cached interface dict
+        :param updated_interface: Updated interface dict
+        :return: True if only lldp_rem_time_mark is modified, False otherwise
+        """
+        if len(cached_interface) != len(updated_interface):
+            return False
+
+        changed_keys = 0
+
+        for key in cached_interface.keys():
+            if 'lldp_rem_time_mark' == key and cached_interface[key] != updated_interface[key]:
+                changed_keys += 1
+            elif key not in updated_interface or cached_interface[key] != updated_interface[key]:
+                return False
+
+        return True if changed_keys == 1 else False
+
     def sync(self, parsed_update):
         """
         Sync LLDP information to redis DB.
@@ -363,18 +389,32 @@ class LldpSyncDaemon(SonicSyncDaemon):
                 logger.debug("sync'd: {}".format(json.dumps(chassis_update, indent=3)))
 
         new, changed, deleted = self.cache_diff(self.interfaces_cache, parsed_update)
+
+        # For changed elements, if only lldp_rem_time_mark changed, update its value, otherwise delete and repopulate
+        for interface in changed:
+            if re.match(SONIC_ETHERNET_RE_PATTERN, interface) is None:
+                logger.warning("Ignoring interface '{}'".format(interface))
+                continue
+            table_key = ':'.join([LldpSyncDaemon.LLDP_ENTRY_TABLE, interface])
+            if self.is_only_time_mark_modified(self.interfaces_cache[interface], parsed_update[interface]):
+                self.db_connector.set(self.db_connector.APPL_DB, table_key, 'lldp_rem_time_mark', parsed_update[interface]['lldp_rem_time_mark'], blocking=True)
+                logger.debug("Only sync'd interface {} lldp_rem_time_mark: {}".format(interface, parsed_update[interface]['lldp_rem_time_mark']))
+            else:
+                self.db_connector.delete(self.db_connector.APPL_DB, table_key)
+                self.db_connector.hmset(self.db_connector.APPL_DB, table_key, parsed_update[interface])
+                logger.debug("Sync'd changed interface {} : {}".format(interface, parsed_update[interface]))
         self.interfaces_cache = parsed_update
-        # Delete LLDP_ENTRIES which were modified or are missing
-        for interface in changed + deleted:
+        # Delete LLDP_ENTRIES which are missing
+        for interface in deleted:
             table_key = ':'.join([LldpSyncDaemon.LLDP_ENTRY_TABLE, interface])
             self.db_connector.delete(self.db_connector.APPL_DB, table_key)
-        # Repopulate LLDP_ENTRY_TABLE by adding all changed elements
-        for interface in changed + new:
+            logger.debug("Delete table_key: {}".format(table_key))
+        # Repopulate LLDP_ENTRY_TABLE by adding new elements
+        for interface in new:
             if re.match(SONIC_ETHERNET_RE_PATTERN, interface) is None:
                 logger.warning("Ignoring interface '{}'".format(interface))
                 continue
             # port_table_key = LLDP_ENTRY_TABLE:INTERFACE_NAME;
             table_key = ':'.join([LldpSyncDaemon.LLDP_ENTRY_TABLE, interface])
-            for k, v in parsed_update[interface].items():
-                self.db_connector.set(self.db_connector.APPL_DB, table_key, k, v, blocking=True)
-            logger.debug("sync'd: \n{}".format(json.dumps(parsed_update[interface], indent=3)))
+            self.db_connector.hmset(self.db_connector.APPL_DB, table_key, parsed_update[interface])
+            logger.debug("Add new interface {} : {}".format(interface, parsed_update[interface]))

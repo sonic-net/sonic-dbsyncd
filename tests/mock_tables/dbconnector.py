@@ -5,7 +5,7 @@ import sys
 
 import mockredis
 import redis
-from swsssdk import SonicV2Connector
+from swsscommon.swsscommon import SonicV2Connector
 from swsssdk import SonicDBConfig
 from swsssdk.interface import DBInterface
 from swsscommon import swsscommon
@@ -15,13 +15,6 @@ if sys.version_info >= (3, 0):
     long = int
     xrange = range
     basestring = str
-
-_old_connect_SonicV2Connector = SonicV2Connector.connect
-
-def connect_SonicV2Connector(self, db_name, retry_on=True):
-    self.dbintf.redis_kwargs['db_name'] = db_name
-    self.dbintf.redis_kwargs['decode_responses'] = True
-    _old_connect_SonicV2Connector(self, db_name, retry_on)
 
 
 def _subscribe_keyspace_notification(self, db_name, client):
@@ -107,9 +100,63 @@ class SwssSyncClient(mockredis.MockRedis):
         # Find every key that matches the pattern
         return [key for key in self.redis.keys() if regex.match(key)]
 
+class MockConnector(object):
+    APPL_DB = 0
+    CONFIG_DB = 4
+    data = {}
+
+    def __init__(self):
+        pass
+
+    def connect(self, db_id):
+        if db_id == 0:
+            with open(INPUT_DIR + '/LLDP_ENTRY_TABLE.json') as f:
+                db = json.load(f)
+                for h, table in db.items():
+                    self.data[h] = {}
+                    for k, v in table.items():
+                        self.data[h][k] = v
+
+        elif db_id == 4:
+            with open(INPUT_DIR + '/CONFIG_DB.json') as f:
+                db = json.load(f)
+                for h, table in db.items():
+                    self.data[h] = {}
+                    for k, v in table.items():
+                        self.data[h][k] = v
+
+
+    def get(self, db_id, key, field):
+        return MockConnector.data[key][field]
+
+    def keys(self, db_id):
+        ret = []
+        for key in MockConnector.data.keys():
+            ret.append(key)
+
+        return ret
+
+    def get_all(self, db_id, key):
+        return MockConnector.data[key]
+
+    def exists(self, db_id, key):
+        return key in MockConnector.data
+
+    def set(self, db_id, key, field, value, blocking=False):
+        self.data[key] = {}
+        self.data[key][field] = value
+
+    def hmset(self, db_id, key, fieldsvalues):
+        self.data[key] = {}
+        for field,value in fieldsvalues.items():
+            self.data[key][field] = value
+
+    def delete(self, db_id, key):
+        del self.data[key]
+
 
 DBInterface._subscribe_keyspace_notification = _subscribe_keyspace_notification
 mockredis.MockRedis.config_set = config_set
 redis.StrictRedis = SwssSyncClient
-SonicV2Connector.connect = connect_SonicV2Connector
-swsscommon.SonicV2Connector = SonicV2Connector
+SonicV2Connector.connect = MockConnector.connect
+swsscommon.SonicV2Connector = MockConnector

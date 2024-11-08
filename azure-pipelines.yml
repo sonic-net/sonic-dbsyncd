@@ -22,8 +22,12 @@ schedules:
       - 20????
   always: true
 
+parameters:
+- name: dist
+  default: bullseye
+
 variables:
-  DIFF_COVER_CHECK_THRESHOLD: 70
+  DIFF_COVER_CHECK_THRESHOLD: 80
   DIFF_COVER_ENABLE: 'true'
   DIFF_COVER_WORKING_DIRECTORY: $(System.DefaultWorkingDirectory)
 
@@ -31,7 +35,7 @@ pool:
   vmImage: 'ubuntu-20.04'
 
 container:
-  image: sonicdev-microsoft.azurecr.io:443/sonic-slave-buster:latest
+  image: sonicdev-microsoft.azurecr.io:443/sonic-slave-bullseye:master
 
 steps:
 - script: |
@@ -64,22 +68,29 @@ steps:
 - script: |
     set -xe
     sudo apt-get -y purge libhiredis-dev libnl-3-dev libnl-route-3-dev
-    sudo dpkg -i $(find . -name "*.deb")
-  workingDirectory: $(Pipeline.Workspace)/target/
+    sudo apt install -y libhiredis0.14
+    sudo dpkg -i libnl-3-200_*.deb
+    sudo dpkg -i libnl-genl-3-200_*.deb
+    sudo dpkg -i libnl-route-3-200_*.deb
+    sudo dpkg -i libnl-nf-3-200_*.deb
+    sudo dpkg -i libyang_1.*.deb
+    sudo dpkg -i libswsscommon_1.0.0_amd64.deb
+    sudo dpkg -i python3-swsscommon_1.0.0_amd64.deb
+  workingDirectory: $(Pipeline.Workspace)/target/debs/${{ parameters.dist }}/
   displayName: 'Install Debian dependencies'
 
 - script: |
     set -xe
-    find . -name "swsssdk-2.0.1-py3-none-any.whl" | xargs -i sudo pip3 install {}
-    find . -name "sonic_py_common-1.0-py3-none-any.whl" | xargs -i sudo pip3 install {}
-  workingDirectory: $(Pipeline.Workspace)/target/
+    sudo pip3 install swsssdk-2.0.1-py3-none-any.whl
+    sudo pip3 install sonic_py_common-1.0-py3-none-any.whl
+  workingDirectory: $(Pipeline.Workspace)/target/python-wheels/${{ parameters.dist }}/
   displayName: 'Install Python dependencies'
 
 - script: |
     set -ex
     # Install .NET CORE
     curl -sSL https://packages.microsoft.com/keys/microsoft.asc | sudo apt-key add -
-    sudo apt-add-repository https://packages.microsoft.com/debian/10/prod
+    sudo apt-add-repository https://packages.microsoft.com/debian/11/prod
     sudo apt-get update
     sudo apt-get install -y dotnet-sdk-5.0
   displayName: "Install .NET CORE"
