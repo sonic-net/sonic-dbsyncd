@@ -18,7 +18,7 @@ import lldp_syncd.daemon
 from swsscommon.swsscommon import SonicV2Connector
 
 INPUT_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'subproc_outputs')
-
+TABLE_PREFIX = "LLDP_ENTRY_TABLE:"
 
 def create_dbconnector():
     db = SonicV2Connector()
@@ -218,3 +218,96 @@ class TestLldpSyncDaemon(TestCase):
         '''
         result = self.daemon.source_update()
         self.assertIsNone(result)
+
+
+    def test_new_interface(self):
+        parsed_update = self.daemon.parse_update(self._json)
+        self.daemon.sync(parsed_update)
+        db = create_dbconnector()
+        keys = db.keys(db.APPL_DB)
+        # Check if each lldp_rem_time_mark is changed
+        dump = {}
+        for k in keys:
+            if k != 'LLDP_LOC_CHASSIS':
+                if TABLE_PREFIX + 'eth0' == k or TABLE_PREFIX + 'Ethernet0' == k:
+                    dump[k] = db.get(db.APPL_DB, k, 'lldp_rem_port_desc')
+                elif TABLE_PREFIX + 'Ethernet100' == k:
+                    dump[k] = db.get(db.APPL_DB, k, 'lldp_rem_port_desc')
+
+        time.sleep(1)
+        # simulate lldp_rem_time_mark was changed or port description was changed or interface was removed
+        new_json = self._json.copy()
+        new_interface = {
+            "Ethernet1": {
+                "rid": "1",
+                "port": {
+                "id": {
+                    "type": "ifname",
+                    "value": "Ethernet1"
+                },
+                "descr": "Ethernet1, this is a port description",
+                "mfs": "9236"
+                },
+                "via": "LLDP",
+                "chassis": {
+                "switch13": {
+                    "mgmt-ip": "10.3.147.196",
+                    "id": {
+                    "type": "mac",
+                    "value": "00:11:22:33:44:55"
+                    },
+                    "ttl": "120",
+                    "descr": "Ethernet1, I'm a little teapot.",
+                    "capability": [
+                    {
+                        "type": "Bridge",
+                        "enabled": True
+                    },
+                    {
+                        "type": "Router",
+                        "enabled": True
+                    }
+                    ]
+                }
+                },
+                "age": "0 day, 05:09:05",
+                "vlan": [
+                {
+                    "vlan-id": "101",
+                    "pvid": True
+                },
+                {
+                    "vlan-id": "201",
+                    "value": "vlan201"
+                }
+                ]
+            }
+        }
+        new_json['lldp']['interface'].append(new_interface)
+
+        parsed_update = self.daemon.parse_update(new_json)
+        self.daemon.sync(parsed_update)
+        keys = db.keys(db.APPL_DB)
+
+        jo = {}
+        for k in keys:
+            if k != 'LLDP_LOC_CHASSIS':
+                if TABLE_PREFIX + 'eth0' == k or TABLE_PREFIX + 'Ethernet0' == k:
+                    jo[k] = db.get(db.APPL_DB, k, 'lldp_rem_port_desc')
+                    self.assertEqual(jo[k], dump[k])
+                elif TABLE_PREFIX + 'Ethernet1' == k:
+                    jo[k] = db.get(db.APPL_DB, k, 'lldp_rem_port_id')
+                    self.assertEqual(jo[k], "Ethernet1")
+                    jo[k] = db.get(db.APPL_DB, k, 'lldp_rem_port_desc')
+                    self.assertEqual(jo[k], "Ethernet1, this is a port description")
+                else:
+                    jo[k] = db.get_all(db.APPL_DB, k)
+
+        #Find and remove the Ethernet1 dictionary, restore test data
+        for interface_dict in new_json["lldp"]["interface"]:
+            if "Ethernet1" in interface_dict:
+                new_json["lldp"]["interface"].remove(interface_dict)
+                break  # Exit loop after removing
+        parsed_update = self.daemon.parse_update(new_json)
+        self.daemon.sync(parsed_update)
+        keys = db.keys(db.APPL_DB)
