@@ -10,7 +10,7 @@ trigger:
 
 parameters:
 - name: dist
-  default: bullseye
+  default: bookworm
 
 variables:
   DIFF_COVER_CHECK_THRESHOLD: 80
@@ -18,17 +18,17 @@ variables:
   DIFF_COVER_WORKING_DIRECTORY: $(System.DefaultWorkingDirectory)
 
 pool:
-  vmImage: 'ubuntu-20.04'
+  vmImage: 'ubuntu-24.04'
 
 container:
-  image: sonicdev-microsoft.azurecr.io:443/sonic-slave-bullseye:master
+  image: sonicdev-microsoft.azurecr.io:443/sonic-slave-bookworm:master
 
 steps:
 - task: DownloadPipelineArtifact@2
   inputs:
     source: specific
     project: build
-    pipeline: 1
+    pipeline: 142
     artifact: sonic-buildimage.vs
     runVersion: 'latestFromBranch'
     runBranch: 'refs/heads/master'
@@ -40,7 +40,11 @@ steps:
 - script: |
     set -xe
     sudo apt-get -y purge libhiredis-dev libnl-3-dev libnl-route-3-dev
-    sudo apt install -y libhiredis0.14
+    wget https://packages.microsoft.com/config/debian/12/packages-microsoft-prod.deb -O packages-microsoft-prod.deb
+    sudo dpkg -i packages-microsoft-prod.deb
+    rm packages-microsoft-prod.deb
+    sudo apt update
+    sudo apt install -y libhiredis0.14 dotnet-sdk-8.0
     sudo dpkg -i libnl-3-200_*.deb
     sudo dpkg -i libnl-genl-3-200_*.deb
     sudo dpkg -i libnl-route-3-200_*.deb
@@ -57,16 +61,6 @@ steps:
     sudo pip3 install sonic_py_common-1.0-py3-none-any.whl
   workingDirectory: $(Pipeline.Workspace)/target/python-wheels/${{ parameters.dist }}/
   displayName: 'Install Python dependencies'
-
-- script: |
-    set -ex
-    # Install .NET CORE
-    curl -sSL https://packages.microsoft.com/keys/microsoft.asc | sudo apt-key add -
-    sudo apt-add-repository https://packages.microsoft.com/debian/11/prod
-    sudo apt-get update
-    sudo apt-get install -y dotnet-sdk-5.0
-  displayName: "Install .NET CORE"
-
 
 # Python 3
 - script: |
