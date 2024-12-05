@@ -18,7 +18,7 @@ import lldp_syncd.daemon
 from swsscommon.swsscommon import SonicV2Connector
 
 INPUT_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'subproc_outputs')
-
+TABLE_PREFIX = "LLDP_ENTRY_TABLE:"
 
 def create_dbconnector():
     db = SonicV2Connector()
@@ -218,3 +218,56 @@ class TestLldpSyncDaemon(TestCase):
         '''
         result = self.daemon.source_update()
         self.assertIsNone(result)
+
+
+    def test_changed_interface(self):
+        parsed_update = self.daemon.parse_update(self._json)
+        self.daemon.sync(parsed_update)
+        db = create_dbconnector()
+        keys = db.keys(db.APPL_DB)
+        # Check if each lldp_rem_time_mark is changed
+        dump = {}
+        for k in keys:
+            if k != 'LLDP_LOC_CHASSIS':
+                if TABLE_PREFIX + 'eth0' == k or TABLE_PREFIX + 'Ethernet0' == k:
+                    dump[k] = db.get(db.APPL_DB, k, 'lldp_rem_time_mark')
+
+        time.sleep(1)
+        # simulate lldp_rem_time_mark was changed or port description was changed or interface was removed
+        changed_json = self._json.copy()
+        changed_json['lldp']['interface'][0]['eth0']['age'] = '0 day, 05:09:12'
+        changed_json['lldp']['interface'][1]['Ethernet0']['age'] = '0 day, 05:09:15'
+
+        parsed_update = self.daemon.parse_update(changed_json)
+        self.daemon.sync(parsed_update)
+        keys = db.keys(db.APPL_DB)
+
+        jo = {}
+        for k in keys:
+            if k != 'LLDP_LOC_CHASSIS':
+                if TABLE_PREFIX + 'eth0' == k or TABLE_PREFIX + 'Ethernet0' == k:
+                    jo[k] = db.get(db.APPL_DB, k, 'lldp_rem_time_mark')
+                    self.assertEqual(int(jo[k]), int(dump[k])+10)
+                else:
+                    jo[k] = db.get_all(db.APPL_DB, k)
+        time.sleep(1)
+        # simulate lldp_rem_time_mark was changed or port description was changed or interface was removed
+        changed_json = self._json.copy()
+        changed_json['lldp']['interface'][0]['eth0']['age'] = '0 day, 05:09:12'
+        changed_json['lldp']['interface'][1]['Ethernet0']['port']['descr'] = 'Ethernet1'
+
+        parsed_update = self.daemon.parse_update(changed_json)
+        self.daemon.sync(parsed_update)
+        keys = db.keys(db.APPL_DB)
+
+        jo = {}
+        for k in keys:
+            if k != 'LLDP_LOC_CHASSIS':
+                if TABLE_PREFIX + 'eth0' == k:
+                    jo[k] = db.get(db.APPL_DB, k, 'lldp_rem_time_mark')
+                    self.assertEqual(int(jo[k]), int(dump[k])+10)
+                elif TABLE_PREFIX + 'Ethernet0' == k:
+                    jo[k] = db.get(db.APPL_DB, k, 'lldp_rem_port_desc')
+                    self.assertEqual(jo[k], 'Ethernet1')
+                else:
+                    jo[k] = db.get_all(db.APPL_DB, k)
