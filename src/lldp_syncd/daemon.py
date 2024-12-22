@@ -132,7 +132,7 @@ class LldpSyncDaemon(SonicSyncDaemon):
             # {'enabled': ..., 'type': 'capability'}
             if isinstance(capability_list, dict):
                 capability_list = [capability_list]
-        except KeyError:
+        except :
             logger.info("Failed to get system capabilities on {} ({})".format(if_name, chassis_id))
             return []
         return capability_list
