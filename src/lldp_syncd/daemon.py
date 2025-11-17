@@ -386,6 +386,7 @@ class LldpSyncDaemon(SonicSyncDaemon):
                 for k, v in chassis_update.items():
                     self.db_connector.set(self.db_connector.APPL_DB,
                                           LldpSyncDaemon.LLDP_LOC_CHASSIS_TABLE, k, v, blocking=True)
+                self.chassis_cache = chassis_update
                 logger.debug("sync'd: {}".format(json.dumps(chassis_update, indent=3)))
 
         new, changed, deleted = self.cache_diff(self.interfaces_cache, parsed_update)
