@@ -271,3 +271,30 @@ class TestLldpSyncDaemon(TestCase):
                     self.assertEqual(jo[k], 'Ethernet1')
                 else:
                     jo[k] = db.get_all(db.APPL_DB, k)
+
+    def test_chassis_cache_no_db_calls_when_unchanged(self):
+        """
+        Test that database operations are not called when chassis data hasn't changed.
+        """
+        # First sync to populate chassis_cache
+        parsed_update = self.daemon.parse_update(self._json)
+        self.daemon.sync(parsed_update)
+        initial_cache = self.daemon.chassis_cache.copy()
+
+        # Sync again with same data - DB operations should NOT be called
+        parsed_update_same = self.daemon.parse_update(self._json)
+
+        with mock.patch.object(self.daemon.db_connector, 'delete') as mock_delete, \
+             mock.patch.object(self.daemon.db_connector, 'set') as mock_set:
+
+            self.daemon.sync(parsed_update_same)
+
+            # Verify chassis DB operations were NOT called
+            chassis_deletes = [c for c in mock_delete.call_args_list
+                             if len(c[0]) > 1 and c[0][1] == 'LLDP_LOC_CHASSIS']
+            chassis_sets = [c for c in mock_set.call_args_list
+                          if len(c[0]) > 1 and c[0][1] == 'LLDP_LOC_CHASSIS']
+
+            self.assertEqual(len(chassis_deletes), 0)
+            self.assertEqual(len(chassis_sets), 0)
+            self.assertEqual(self.daemon.chassis_cache, initial_cache)
