@@ -218,6 +218,62 @@ class TestLldpSyncDaemon(TestCase):
         '''
         result = self.daemon.source_update()
         self.assertIsNone(result)
+    
+    def test_unsupported_port_subtype(self):
+            bad_json = {
+            "lldp": {
+                "interface": [
+                    {
+                        "Ethernet1": {
+                            "via": "LLDP",
+                            "rid": "1",
+                            "age": "0 day, 00:00:10",
+                            "chassis": {
+                                "id": {"type": "mac", "value": "aa:bb:cc:dd:ee:ff"}
+                            },
+                            "port": {
+                                "id": {"type": "unhandled", "value": "garbage"},
+                                "ttl": "120"
+                            }
+                        }
+                    }
+                ]
+            }
+        }
+
+            parsed = self.daemon.parse_update(bad_json)
+
+            self.assertIn("Ethernet1", parsed)
+            self.assertIsNone(parsed["Ethernet1"]["lldp_rem_port_id_subtype"])
+            self.assertEqual(parsed["Ethernet1"]["lldp_rem_port_id"], None)
+    
+    def test_unsupported_chassis_subtype(self):
+            bad_json = {
+            "lldp": {
+                "interface": [
+                    {
+                        "Ethernet2": {
+                            "via": "LLDP",
+                            "rid": "1",
+                            "age": "0 day, 00:00:10",
+                            "chassis": {
+                                "id": {"type": "unhandled", "value": "garbage"}
+                            },
+                            "port": {
+                                "id": {"type": "ifname", "value": "Ethernet2"},
+                                "ttl": "120"
+                            }
+                        }
+                    }
+                ]
+            }
+        }
+
+            parsed = self.daemon.parse_update(bad_json)
+
+            self.assertIn("Ethernet2", parsed)
+            self.assertEqual(parsed["Ethernet2"]["lldp_rem_chassis_id_subtype"], "")
+            self.assertEqual(parsed["Ethernet2"]["lldp_rem_chassis_id"], "")
 
 
     def test_changed_interface(self):
