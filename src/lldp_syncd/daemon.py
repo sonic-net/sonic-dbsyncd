@@ -302,21 +302,22 @@ class LldpSyncDaemon(SonicSyncDaemon):
         try:
             if 'id' in chassis_attributes and 'id' not in chassis_attributes['id']:
                 attributes = chassis_attributes
-                id_attributes = chassis_attributes.get('id', {})
+                id_attributes = chassis_attributes.get('id') or {}
             else:
                 (sys_name, attributes) = list(chassis_attributes.items())[0]
-                id_attributes = attributes.get('id', {})
+                id_attributes = attributes.get('id') or {}
 
             id_type = id_attributes.get('type')
 
             if id_type not in self.ChassisIdSubtypeMap.__members__:
-                logger.error(
-                    "Unsupported LLDP chassis ID subtype: %s", 
-                    id_type,
-            )
+              logger.warning(
+                 "lldp-syncd: unsupported chassis id subtype: %s",
+               id_type,
+               )
             else:
-                chassis_id_subtype = str(self.ChassisIdSubtypeMap[id_type].value)
-                chassis_id = id_attributes.get('value', '')
+               chassis_id_subtype = str(self.ChassisIdSubtypeMap[id_type].value)
+               chassis_id = id_attributes.get('value', '')
+
 
             descr = attributes.get('descr', '')
             mgmt_ip = attributes.get('mgmt-ip', '')
@@ -334,23 +335,23 @@ class LldpSyncDaemon(SonicSyncDaemon):
                 )
 
     def parse_port(self, port_attributes):
-        port_identifiers = port_attributes.get('id', {})
+       port_identifiers = port_attributes.get('id') or {}
 
-        subtype = None
-        value = None
+       subtype = None
+       value = None
 
-        id_type = port_identifiers.get('type')
+       id_type = port_identifiers.get('type')
 
-        if id_type not in self.PortIdSubtypeMap.__members__:
-            logger.error(
-                "Unsupported LLDP port ID subtype: %s", 
+       if id_type not in self.PortIdSubtypeMap.__members__:
+                logger.warning(
+                "lldp-syncd: unsupported port id subtype: %s",
                 id_type,
         )
-        else:
+       else:
             subtype = str(self.PortIdSubtypeMap[id_type].value)
             value = port_identifiers.get('value', '')
 
-        return (
+       return (
             subtype,
             value,
             port_attributes.get('descr', ''),
