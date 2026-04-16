@@ -391,30 +391,32 @@ class LldpSyncDaemon(SonicSyncDaemon):
 
         new, changed, deleted = self.cache_diff(self.interfaces_cache, parsed_update)
 
-        if new or deleted:
-            # If detects any new or deleted interfaces, repopulate for changed interfaces
-            for interface in changed:
-                if re.match(SONIC_ETHERNET_RE_PATTERN, interface) is None:
-                    logger.warning("Ignoring interface '{}'".format(interface))
-                    continue
-                table_key = ':'.join([LldpSyncDaemon.LLDP_ENTRY_TABLE, interface])
+        # Always use incremental update for changed interfaces regardless of
+        # whether new or deleted interfaces exist. Previously, when new or deleted
+        # interfaces were detected, all changed interfaces were force-repopulated
+        # (delete+re-add), bypassing the is_only_time_mark_modified optimization.
+        # On high-scale systems (500+ ports), this caused a cascading repopulation
+        # storm during LLDP convergence, as new neighbors arriving each sync cycle
+        # triggered unnecessary force-repopulate of all existing entries.
+        for interface in changed:
+            if re.match(SONIC_ETHERNET_RE_PATTERN, interface) is None:
+                logger.warning("Ignoring interface '{}'".format(interface))
+                continue
+            table_key = ':'.join([LldpSyncDaemon.LLDP_ENTRY_TABLE, interface])
+            if self.is_only_time_mark_modified(self.interfaces_cache[interface], parsed_update[interface]):
+                self.db_connector.set(
+                    self.db_connector.APPL_DB, table_key,
+                    'lldp_rem_time_mark',
+                    parsed_update[interface]['lldp_rem_time_mark'],
+                    blocking=True)
+                logger.debug(
+                    "Only sync'd interface {} lldp_rem_time_mark: {}"
+                    .format(interface,
+                            parsed_update[interface]['lldp_rem_time_mark']))
+            else:
                 self.db_connector.delete(self.db_connector.APPL_DB, table_key)
                 self.db_connector.hmset(self.db_connector.APPL_DB, table_key, parsed_update[interface])
-                logger.info("Force repopulate the changed interface {} : {}".format(interface, parsed_update[interface]))
-        else:
-            # For changed elements, if only lldp_rem_time_mark changed, update its value, otherwise delete and repopulate
-            for interface in changed:
-                if re.match(SONIC_ETHERNET_RE_PATTERN, interface) is None:
-                    logger.warning("Ignoring interface '{}'".format(interface))
-                    continue
-                table_key = ':'.join([LldpSyncDaemon.LLDP_ENTRY_TABLE, interface])
-                if self.is_only_time_mark_modified(self.interfaces_cache[interface], parsed_update[interface]):
-                    self.db_connector.set(self.db_connector.APPL_DB, table_key, 'lldp_rem_time_mark', parsed_update[interface]['lldp_rem_time_mark'], blocking=True)
-                    logger.debug("Only sync'd interface {} lldp_rem_time_mark: {}".format(interface, parsed_update[interface]['lldp_rem_time_mark']))
-                else:
-                    self.db_connector.delete(self.db_connector.APPL_DB, table_key)
-                    self.db_connector.hmset(self.db_connector.APPL_DB, table_key, parsed_update[interface])
-                    logger.info("Repopulate for changed interface {} : {}".format(interface, parsed_update[interface]))
+                logger.info("Repopulate for changed interface {} : {}".format(interface, parsed_update[interface]))
         self.interfaces_cache = parsed_update
         # Delete LLDP_ENTRIES which are missing
         for interface in deleted:
