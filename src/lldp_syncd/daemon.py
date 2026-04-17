@@ -392,31 +392,64 @@ class LldpSyncDaemon(SonicSyncDaemon):
         new, changed, deleted = self.cache_diff(self.interfaces_cache, parsed_update)
 
         # Always use incremental update for changed interfaces regardless of
-        # whether new or deleted interfaces exist. Previously, when new or deleted
-        # interfaces were detected, all changed interfaces were force-repopulated
-        # (delete+re-add), bypassing the is_only_time_mark_modified optimization.
-        # On high-scale systems (500+ ports), this caused a cascading repopulation
-        # storm during LLDP convergence, as new neighbors arriving each sync cycle
-        # triggered unnecessary force-repopulate of all existing entries.
+        # whether new or deleted interfaces exist in this sync cycle.
+        # Previously (PR #71), all changed interfaces were force-repopulated
+        # when new/deleted existed. On high-scale systems (500+ ports), this
+        # caused a cascading repopulation storm during LLDP convergence.
+        # Instead, we verify APPL_DB completeness per-interface: if APPL_DB
+        # was flushed externally (e.g. orchagent restart), the entry will be
+        # missing and we repopulate it. This handles both the APPL_DB flush
+        # scenario (PR #71) and prevents cascade on high-scale systems.
         for interface in changed:
             if re.match(SONIC_ETHERNET_RE_PATTERN, interface) is None:
                 logger.warning("Ignoring interface '{}'".format(interface))
                 continue
             table_key = ':'.join([LldpSyncDaemon.LLDP_ENTRY_TABLE, interface])
-            if self.is_only_time_mark_modified(self.interfaces_cache[interface], parsed_update[interface]):
-                self.db_connector.set(
+            if self.is_only_time_mark_modified(
+                    self.interfaces_cache[interface],
+                    parsed_update[interface]):
+                # Before using time_mark-only shortcut, verify APPL_DB has
+                # complete data. After external APPL_DB flush, cache still
+                # has full data so is_only_time_mark_modified returns True,
+                # but APPL_DB is empty — writing only time_mark would leave
+                # the entry incomplete (PR #71 scenario).
+                if self.db_connector.exists(
+                        self.db_connector.APPL_DB, table_key):
+                    existing = self.db_connector.get_all(
+                        self.db_connector.APPL_DB, table_key)
+                    if len(existing) > 1:
+                        self.db_connector.set(
+                            self.db_connector.APPL_DB, table_key,
+                            'lldp_rem_time_mark',
+                            parsed_update[interface]['lldp_rem_time_mark'],
+                            blocking=True)
+                        logger.debug(
+                            "Only sync'd interface {} "
+                            "lldp_rem_time_mark: {}".format(
+                                interface,
+                                parsed_update[interface][
+                                    'lldp_rem_time_mark']))
+                        continue
+                # APPL_DB missing or incomplete for this interface
+                if self.db_connector.exists(
+                        self.db_connector.APPL_DB, table_key):
+                    self.db_connector.delete(
+                        self.db_connector.APPL_DB, table_key)
+                self.db_connector.hmset(
                     self.db_connector.APPL_DB, table_key,
-                    'lldp_rem_time_mark',
-                    parsed_update[interface]['lldp_rem_time_mark'],
-                    blocking=True)
-                logger.debug(
-                    "Only sync'd interface {} lldp_rem_time_mark: {}"
-                    .format(interface,
-                            parsed_update[interface]['lldp_rem_time_mark']))
+                    parsed_update[interface])
+                logger.info(
+                    "Repopulate stale interface {} : {}".format(
+                        interface, parsed_update[interface]))
             else:
-                self.db_connector.delete(self.db_connector.APPL_DB, table_key)
-                self.db_connector.hmset(self.db_connector.APPL_DB, table_key, parsed_update[interface])
-                logger.info("Repopulate for changed interface {} : {}".format(interface, parsed_update[interface]))
+                self.db_connector.delete(
+                    self.db_connector.APPL_DB, table_key)
+                self.db_connector.hmset(
+                    self.db_connector.APPL_DB, table_key,
+                    parsed_update[interface])
+                logger.info(
+                    "Repopulate for changed interface {} : {}".format(
+                        interface, parsed_update[interface]))
         self.interfaces_cache = parsed_update
         # Delete LLDP_ENTRIES which are missing
         for interface in deleted:

@@ -143,7 +143,8 @@ class MockConnector(object):
         return key in MockConnector.data
 
     def set(self, db_id, key, field, value, blocking=False):
-        self.data[key] = {}
+        if key not in self.data:
+            self.data[key] = {}
         self.data[key][field] = value
 
     def hmset(self, db_id, key, fieldsvalues):

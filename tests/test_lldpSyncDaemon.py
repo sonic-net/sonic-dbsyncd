@@ -298,3 +298,99 @@ class TestLldpSyncDaemon(TestCase):
             self.assertEqual(len(chassis_deletes), 0)
             self.assertEqual(len(chassis_sets), 0)
             self.assertEqual(self.daemon.chassis_cache, initial_cache)
+
+    def test_appl_db_flush_repopulates_changed_interfaces(self):
+        """
+        Regression test for PR #71 scenario: after APPL_DB is flushed externally
+        (e.g. orchagent restart), changed interfaces with only time_mark differences
+        must be fully repopulated, not just have time_mark updated.
+        """
+        # Step 1: Initial sync populates APPL_DB and cache
+        parsed_update = self.daemon.parse_update(self._json)
+        self.daemon.sync(parsed_update)
+        db = create_dbconnector()
+
+        # Verify eth0 has complete data
+        eth0_data = db.get_all(db.APPL_DB, TABLE_PREFIX + 'eth0')
+        self.assertIn('lldp_rem_chassis_id', eth0_data)
+        self.assertIn('lldp_rem_port_id', eth0_data)
+        self.assertGreater(len(eth0_data), 1)
+
+        # Step 2: Simulate APPL_DB flush (external event)
+        for key in list(db.data.keys()):
+            if key.startswith(TABLE_PREFIX):
+                del db.data[key]
+
+        # Step 3: Sync with only time_mark change on eth0
+        # Other interfaces removed to simulate them going down (deleted)
+        changed_json = self._json.copy()
+        changed_json['lldp']['interface'] = [
+            changed_json['lldp']['interface'][0]  # Keep only eth0
+        ]
+        changed_json['lldp']['interface'][0]['eth0']['age'] = '0 day, 05:09:12'
+
+        parsed_update = self.daemon.parse_update(changed_json)
+        self.daemon.sync(parsed_update)
+
+        # Step 4: Verify eth0 was fully repopulated, not just time_mark
+        self.assertTrue(db.exists(db.APPL_DB, TABLE_PREFIX + 'eth0'))
+        eth0_data = db.get_all(db.APPL_DB, TABLE_PREFIX + 'eth0')
+        self.assertIn('lldp_rem_chassis_id', eth0_data)
+        self.assertIn('lldp_rem_port_id', eth0_data)
+        self.assertIn('lldp_rem_time_mark', eth0_data)
+        self.assertGreater(len(eth0_data), 1,
+                           "eth0 should have complete data, not just time_mark")
+
+    def test_no_cascade_when_new_and_changed_coexist(self):
+        """
+        Regression test for issue #26568: when new interfaces arrive alongside
+        changed interfaces (time_mark only), the changed interfaces should NOT
+        be force-repopulated. Only time_mark should be updated.
+        """
+        # Step 1: Initial sync with subset of interfaces
+        initial_json = self._json.copy()
+        initial_json['lldp']['interface'] = [
+            initial_json['lldp']['interface'][0],  # eth0
+            initial_json['lldp']['interface'][1],  # Ethernet0
+        ]
+        parsed_update = self.daemon.parse_update(initial_json)
+        self.daemon.sync(parsed_update)
+        db = create_dbconnector()
+
+        # Record initial eth0 data
+        eth0_full = db.get_all(db.APPL_DB, TABLE_PREFIX + 'eth0')
+        eth0_time_mark = eth0_full['lldp_rem_time_mark']
+
+        # Step 2: Sync with eth0 time_mark changed + new interface added
+        changed_json = self._json.copy()
+        changed_json['lldp']['interface'][0]['eth0']['age'] = '0 day, 05:09:12'
+        # Ethernet0 unchanged time_mark, Ethernet100 and Ethernet104 are NEW
+
+        parsed_update = self.daemon.parse_update(changed_json)
+
+        # Track delete calls to detect force-repopulate of eth0
+        original_delete = self.daemon.db_connector.delete
+        deleted_keys = []
+
+        def tracking_delete(db_id, key):
+            deleted_keys.append(key)
+            return original_delete(db_id, key)
+
+        self.daemon.db_connector.delete = tracking_delete
+        self.daemon.sync(parsed_update)
+
+        # Step 3: Verify eth0 was NOT force-repopulated (no delete+hmset)
+        self.assertNotIn(TABLE_PREFIX + 'eth0', deleted_keys,
+                         "eth0 should not be deleted during convergence "
+                         "when only time_mark changed")
+
+        # Verify time_mark was updated
+        eth0_new = db.get_all(db.APPL_DB, TABLE_PREFIX + 'eth0')
+        self.assertNotEqual(eth0_new['lldp_rem_time_mark'], eth0_time_mark)
+        # Verify complete data still present
+        self.assertIn('lldp_rem_chassis_id', eth0_new)
+        self.assertIn('lldp_rem_port_id', eth0_new)
+
+        # Verify new interfaces were added
+        self.assertTrue(db.exists(db.APPL_DB, TABLE_PREFIX + 'Ethernet100'))
+        self.assertTrue(db.exists(db.APPL_DB, TABLE_PREFIX + 'Ethernet104'))
