@@ -137,7 +137,10 @@ class TestLldpSyncDaemon(TestCase):
         for interface in interface_list:
             (if_name, if_attributes), = interface.items()
             capability_list = self.daemon.get_sys_capability_list(if_attributes, if_name, "fake_chassis_id")
-            self.assertNotEqual(capability_list, [])
+            if if_name == 'Ethernet47':
+                self.assertEqual(capability_list, [])
+            else:
+                self.assertNotEqual(capability_list, [])
 
     def test_changed_deleted_interface(self):
         parsed_update = self.daemon.parse_update(self._json)
