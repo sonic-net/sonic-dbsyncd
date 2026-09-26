@@ -181,8 +181,7 @@ class TestLldpSyncDaemon(TestCase):
             self.fail("After removing Ethernet104, it is still found in APPL_DB!")
 
     @mock.patch('subprocess.check_output')
-    def test_invalid_chassis_name(self, mock_check_output):
-        # mock the invalid chassis name
+    def test_control_characters_are_removed_from_lldp_output(self, mock_check_output):
         mock_check_output.return_value = '''
         {
             "local-chassis": {
@@ -216,8 +215,35 @@ class TestLldpSyncDaemon(TestCase):
             }
         }
         '''
-        result = self.daemon.source_update()
-        self.assertIsNone(result)
+        result = self.daemon._scrap_output(['/usr/sbin/lldpctl', '-f', 'json'])
+        chassis = result['local-chassis']['chassis']
+        self.assertIn('chassis_name', chassis)
+        self.assertNotIn('chassis_name\1', chassis)
+
+    def test_nested_lldp_control_characters_are_removed(self):
+        value = {'name\x7f': ['remote\x1bhost', {'id': 'port\x85name'}]}
+        self.assertEqual({'name': ['remotehost', {'id': 'portname'}]},
+                         lldp_syncd.daemon.sanitize_lldp_strings(value))
+
+    def test_unhandled_port_subtype_does_not_abort_update(self):
+        lldp_json = json.loads(json.dumps(self._json))
+        interface = lldp_json['lldp']['interface'][1]['Ethernet0']
+        interface['port']['id']['type'] = 'unhandled'
+
+        result = self.daemon.parse_update(lldp_json)
+        self.assertIsNotNone(result)
+        self.assertIn('Ethernet0', result)
+        self.assertEqual('', result['Ethernet0']['lldp_rem_port_id_subtype'])
+        self.assertEqual(interface['port']['id']['value'], result['Ethernet0']['lldp_rem_port_id'])
+
+    def test_malformed_port_id_shape_does_not_abort_update(self):
+        for bad_id in (None, 'not-an-object', [], {'type': [], 'value': ['bad']}):
+            lldp_json = json.loads(json.dumps(self._json))
+            lldp_json['lldp']['interface'][1]['Ethernet0']['port']['id'] = bad_id
+            result = self.daemon.parse_update(lldp_json)
+            self.assertIsNotNone(result)
+            self.assertEqual('', result['Ethernet0']['lldp_rem_port_id_subtype'])
+            self.assertEqual('', result['Ethernet0']['lldp_rem_port_id'])
 
 
     def test_changed_interface(self):
