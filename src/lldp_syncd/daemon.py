@@ -296,25 +296,36 @@ class LldpSyncDaemon(SonicSyncDaemon):
             logger.exception("Failed to parse LLDPd JSON. \n{}\n -- ".format(lldp_json))
 
     def parse_chassis(self, chassis_attributes):
+
+        chassis_id_subtype = chassis_id = sys_name = descr = mgmt_ip = ''
+
         try:
             if 'id' in chassis_attributes and 'id' not in chassis_attributes['id']:
-                sys_name = ''
                 attributes = chassis_attributes
-                id_attributes = chassis_attributes['id']
+                id_attributes = chassis_attributes.get('id') or {}
             else:
                 (sys_name, attributes) = list(chassis_attributes.items())[0]
-                id_attributes = attributes.get('id', '')
+                id_attributes = attributes.get('id') or {}
 
-            chassis_id_subtype = str(self.ChassisIdSubtypeMap[id_attributes['type']].value)
-            chassis_id = id_attributes.get('value', '')
+            id_type = id_attributes.get('type')
+
+            if id_type not in self.ChassisIdSubtypeMap.__members__:
+              logger.warning(
+                 "lldp-syncd: unsupported chassis id subtype: %s",
+               id_type,
+               )
+            else:
+               chassis_id_subtype = str(self.ChassisIdSubtypeMap[id_type].value)
+               chassis_id = id_attributes.get('value', '')
+
+
             descr = attributes.get('descr', '')
             mgmt_ip = attributes.get('mgmt-ip', '')
             if isinstance(mgmt_ip, list):
                 mgmt_ip = ','.join(mgmt_ip)
-        except (KeyError, ValueError):
-            logger.exception("Could not infer system information from: {}"
-                             .format(chassis_attributes))
-            chassis_id_subtype = chassis_id = sys_name = descr = mgmt_ip = ''
+
+        except (KeyError, AttributeError, TypeError):
+            logger.error("Could not infer system information from: %s", chassis_attributes)
 
         return (chassis_id_subtype,
                 chassis_id,
@@ -324,19 +335,27 @@ class LldpSyncDaemon(SonicSyncDaemon):
                 )
 
     def parse_port(self, port_attributes):
-        port_identifiers = port_attributes.get('id')
-        try:
-            subtype = str(self.PortIdSubtypeMap[port_identifiers['type']].value)
-            value = port_identifiers['value']
+       port_identifiers = port_attributes.get('id') or {}
 
-        except ValueError:
-            logger.exception("Could not infer chassis subtype from: {}".format(port_attributes))
-            subtype, value = None
+       subtype = None
+       value = None
 
-        return (subtype,
-                value,
-                port_attributes.get('descr', ''),
-                )
+       id_type = port_identifiers.get('type')
+
+       if id_type not in self.PortIdSubtypeMap.__members__:
+                logger.warning(
+                "lldp-syncd: unsupported port id subtype: %s",
+                id_type,
+        )
+       else:
+            subtype = str(self.PortIdSubtypeMap[id_type].value)
+            value = port_identifiers.get('value', '')
+
+       return (
+            subtype,
+            value,
+            port_attributes.get('descr', ''),
+    )
 
     def cache_diff(self, cache, update):
         """
