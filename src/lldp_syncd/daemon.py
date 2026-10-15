@@ -160,7 +160,7 @@ class LldpSyncDaemon(SonicSyncDaemon):
     def __init__(self, update_interval=None):
         super(LldpSyncDaemon, self).__init__()
         self._update_interval = update_interval or DEFAULT_UPDATE_INTERVAL
-        self.db_connector = SonicV2Connector()
+        self.db_connector = SonicV2Connector(use_unix_socket_path=True)
         self.db_connector.connect(self.db_connector.APPL_DB)
 
         self.chassis_cache = {}

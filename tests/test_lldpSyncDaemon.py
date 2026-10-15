@@ -56,6 +56,13 @@ class TestLldpSyncDaemon(TestCase):
 
         self.daemon = lldp_syncd.LldpSyncDaemon()
 
+    def test_appl_db_uses_unix_socket(self):
+        self.assertIs(self.daemon.db_connector.use_unix_socket_path, True)
+        self.assertEqual(
+            self.daemon.db_connector.connected_dbs,
+            [self.daemon.db_connector.APPL_DB]
+        )
+
     def test_parse_json(self):
         jo = self.daemon.parse_update(self._json)
         print(json.dumps(jo, indent=3))
