@@ -305,3 +305,32 @@ class TestLldpSyncDaemon(TestCase):
             self.assertEqual(len(chassis_deletes), 0)
             self.assertEqual(len(chassis_sets), 0)
             self.assertEqual(self.daemon.chassis_cache, initial_cache)
+
+    def test_chassis_cache_repopulates_missing_db_entry(self):
+        """
+        Test that unchanged chassis data is rewritten when its DB entry is missing.
+        """
+        parsed_update = self.daemon.parse_update(self._json)
+        self.daemon.sync(parsed_update)
+        initial_cache = self.daemon.chassis_cache.copy()
+
+        self.daemon.db_connector.delete(
+            self.daemon.db_connector.APPL_DB,
+            self.daemon.LLDP_LOC_CHASSIS_TABLE
+        )
+        parsed_update_same = self.daemon.parse_update(self._json)
+
+        with mock.patch.object(self.daemon.db_connector, 'delete') as mock_delete, \
+             mock.patch.object(self.daemon.db_connector, 'set') as mock_set:
+
+            self.daemon.sync(parsed_update_same)
+
+            chassis_deletes = [c for c in mock_delete.call_args_list
+                               if len(c[0]) > 1 and c[0][1] == 'LLDP_LOC_CHASSIS']
+            chassis_sets = [c for c in mock_set.call_args_list
+                            if len(c[0]) > 1 and c[0][1] == 'LLDP_LOC_CHASSIS']
+            written_chassis = {c[0][2]: c[0][3] for c in chassis_sets}
+
+            self.assertEqual(len(chassis_deletes), 0)
+            self.assertEqual(written_chassis, initial_cache)
+            self.assertEqual(self.daemon.chassis_cache, initial_cache)

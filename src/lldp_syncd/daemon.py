@@ -380,9 +380,14 @@ class LldpSyncDaemon(SonicSyncDaemon):
         # push local chassis data to APP DB
         if 'local-chassis' in parsed_update:
             chassis_update = parsed_update.pop('local-chassis')
-            if chassis_update != self.chassis_cache:
-                self.db_connector.delete(self.db_connector.APPL_DB,
-                                         LldpSyncDaemon.LLDP_LOC_CHASSIS_TABLE)
+            chassis_entry_exists = self.db_connector.exists(
+                self.db_connector.APPL_DB,
+                LldpSyncDaemon.LLDP_LOC_CHASSIS_TABLE
+            )
+            if chassis_update != self.chassis_cache or not chassis_entry_exists:
+                if chassis_entry_exists:
+                    self.db_connector.delete(self.db_connector.APPL_DB,
+                                             LldpSyncDaemon.LLDP_LOC_CHASSIS_TABLE)
                 for k, v in chassis_update.items():
                     self.db_connector.set(self.db_connector.APPL_DB,
                                           LldpSyncDaemon.LLDP_LOC_CHASSIS_TABLE, k, v, blocking=True)
