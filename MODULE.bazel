@@ -1,0 +1,43 @@
+module(
+    name = "sonic-dbsyncd",
+    version = "2.0.0",
+    bazel_compatibility = [
+        ">=8.5.1",
+        "<=8.5.1",
+    ],
+)
+
+bazel_dep(name = "rules_python", version = "1.9.0")
+bazel_dep(name = "aspect_bazel_lib", version = "2.19.3")
+bazel_dep(name = "rules_pkg", version = "1.1.0")
+bazel_dep(name = "tar.bzl", version = "0.10.5.sonic.1")
+bazel_dep(name = "rules_distroless", version = "0.9.4.sonic.15")
+bazel_dep(name = "platforms", version = "1.1.0")
+bazel_dep(
+    name = "sonic-build-infra",
+    version = "0.0.25-17a1e555291c64be1a6ff008f33352bffc4f8e5c",
+    repo_name = "sonic_build_infra",
+)
+bazel_dep(
+    name = "sonic-swss-common",
+    version = "0.0.7-f7fda40c02b3a8b4bbbff3d17fca3dff83f4cbad",
+    repo_name = "sonic_swss_common",
+)
+
+python = use_extension("@rules_python//python/extensions:python.bzl", "python")
+python.toolchain(
+    is_default = True,
+    python_version = "3.13",
+)
+
+# The selected infrastructure extension requires a root tag. This Python
+# component does not build Rust or request another Rust toolchain.
+bazel_dep(name = "rules_rs", version = "0.1.0")
+
+rust = use_extension("@rules_rs//rs:rules_rust_reexported_extensions.bzl", "rust")
+rust.toolchain(versions = [])
+
+# This migration executes natively on Linux AMD64. Use the declared upstream
+# BSD tar executable, never a host-installed extraction command.
+tar_tools = use_extension("@tar.bzl//tar:extensions.bzl", "toolchains")
+use_repo(tar_tools, "bsd_tar_toolchains_linux_amd64")

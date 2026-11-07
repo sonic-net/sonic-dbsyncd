@@ -1,0 +1,104 @@
+name: Bazel dbsyncd
+
+on:
+  pull_request:
+  push:
+    branches: [master]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  native:
+    name: DBSyncd source and wheel (AMD64)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    container: debian:trixie-20260918@sha256:9cc080028c43b27d2074d63a5f9caf7166d731494965616c1a6d2827a004585c
+    env:
+      # setup-bazel configures one output base. Give the second workspace its
+      # own server while preserving the shared action/repository caches.
+      BAZEL_TEST_OUTPUT_BASE: /tmp/dbsyncd-bazel-tests
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - name: Install execution tools
+        run: |
+          apt-get update
+          apt-get install -y --no-install-recommends binutils binutils-gold build-essential ca-certificates curl git patch pkg-config python3 tar unzip zstd
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: bazel-contrib/setup-bazel@c5acdfb288317d0b5c0bbd7a396a3dc868bb0f86 # 0.19.0
+        with:
+          bazelisk-version: 1.29.0
+          bazelisk-cache: true
+          repository-cache: true
+          disk-cache: dbsyncd-amd64
+          cache-version: "8.5.1"
+      - name: Preserve registry main and shared caches in both workspaces
+        run: |
+          python3 - <<'PY'
+          import os, shlex, shutil
+          from pathlib import Path
+          main = 'https://raw.githubusercontent.com/securely1g/sonic-bazel-registry/main'
+          caches = [line for line in (Path.home() / '.bazelrc').read_text().splitlines()
+                    if line.startswith(('build --disk_cache=', 'common --repository_cache='))]
+          assert len(caches) == 2
+          evidence = Path('bazel-evidence')
+          evidence.mkdir(exist_ok=True)
+          for source, name in [(Path('.bazelrc'), 'owner'), (Path('tests/bazel/.bazelrc'), 'tests')]:
+              text = source.read_text()
+              assert text.count(main) == 1
+              text += '\n' + '\n'.join(caches) + '\n'
+              Path('/tmp/dbsyncd-ci-' + name + '.bazelrc').write_text(text)
+              (evidence / ('effective-' + name + '.bazelrc')).write_text(text)
+          binary = shutil.which('bazel')
+          assert binary
+          wrapper = Path('/tmp/dbsyncd-ci-bazel')
+          wrapper.write_text('#!/bin/sh\n'
+                             'case "$PWD" in */tests/bazel) profile=tests;; *) profile=owner;; esac\n'
+                             'exec ' + shlex.quote(binary) + ' --nosystem_rc --nohome_rc --noworkspace_rc '
+                             '--bazelrc="/tmp/dbsyncd-ci-$profile.bazelrc" "$@"\n')
+          wrapper.chmod(0o755)
+          with open(os.environ['GITHUB_ENV'], 'a') as env:
+              env.write('BAZEL_BINARY=' + str(wrapper) + '\n')
+          PY
+      - name: Build owner wheel and run source/runtime tests
+        env:
+          BAZELISK_GITHUB_TOKEN: ""
+          CI_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          test "$(uname -m)" = x86_64
+          test "$(. /etc/os-release; echo "$VERSION_CODENAME")" = trixie
+          mkdir -p bazel-evidence
+          "$BAZEL_BINARY" aquery 'deps(//:sonic_dbsyncd_runtime)' --output=jsonproto > bazel-evidence/owner-actions.json
+          python3 tests/bazel/audit_actions.py bazel-evidence/owner-actions.json > bazel-evidence/owner-action-audit.json
+          python3 tests/bazel/check_incremental.py --bazel "$BAZEL_BINARY" --output bazel-evidence/incremental.json
+          "$BAZEL_BINARY" aquery 'deps(set(//:lldp_syncd //:sonic_syncd))' --output=jsonproto > bazel-evidence/library-actions.json
+          python3 tests/bazel/audit_actions.py bazel-evidence/library-actions.json > bazel-evidence/library-action-audit.json
+          "$BAZEL_BINARY" build --jobs=2 --local_resources=cpu=2 //:lldp_syncd //:sonic_syncd
+          (
+            cd tests/bazel
+            "$BAZEL_BINARY" --output_base="$BAZEL_TEST_OUTPUT_BASE" aquery 'deps(set(//:unit_tests //:installed_wheel_test))' --output=jsonproto > ../../bazel-evidence/test-actions.json
+            python3 audit_actions.py ../../bazel-evidence/test-actions.json > ../../bazel-evidence/test-action-audit.json
+            "$BAZEL_BINARY" --output_base="$BAZEL_TEST_OUTPUT_BASE" test //:unit_tests //:installed_wheel_test --jobs=2 --local_resources=cpu=2 --local_test_jobs=1
+          )
+          git -c safe.directory="$GITHUB_WORKSPACE" diff --exit-code
+      - name: Retain wheel and test evidence
+        if: always()
+        env:
+          BAZELISK_GITHUB_TOKEN: ""
+          CI_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          CI_BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        run: python3 tests/bazel/collect_evidence.py
+      - name: Upload exact wheel and test evidence
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: sonic-dbsyncd-amd64
+          path: bazel-evidence
+          if-no-files-found: error
+          retention-days: 14
+          compression-level: 1
