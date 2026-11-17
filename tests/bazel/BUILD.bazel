@@ -30,6 +30,7 @@ sh_test(
     timeout = "long",
     srcs = ["@sonic_swss_common//tools/bazel/runtime:run_with_runtime.py"],
     args = [
+        "$(rootpath @patchelf//:patchelf)",
         "$(rootpath @sonic_swss_common//tools/bazel/runtime:test_runtime)",
         "-",
         "enabled",
@@ -38,6 +39,7 @@ sh_test(
     ],
     data = [
         ":unit_runner",
+        "@patchelf//:patchelf",
         "@sonic_dbsyncd//:setup.py",
         "@sonic_dbsyncd//:test_sources",
         "@sonic_swss_common//tools/bazel/runtime:test_runtime",
@@ -70,6 +72,7 @@ sh_test(
     size = "medium",
     srcs = ["@sonic_swss_common//tools/bazel/runtime:run_with_runtime.py"],
     args = [
+        "$(rootpath @patchelf//:patchelf)",
         "$(rootpath @sonic_buildimage//src/sonic-eventd:test_runtime)",
         "-",
         "enabled",
@@ -83,6 +86,7 @@ sh_test(
     data = [
         "native_redis_probe.py",
         ":installed_wheel_runner",
+        "@patchelf//:patchelf",
         "@sonic_buildimage//src/sonic-eventd:test_runtime",
         "@sonic_buildimage//src/sonic-py-common:sonic_py_common_wheel",
         "@sonic_dbsyncd//:setup.py",
