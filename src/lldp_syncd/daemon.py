@@ -16,6 +16,22 @@ LLDPD_TIME_FORMAT = '%H:%M:%S'
 
 DEFAULT_UPDATE_INTERVAL = 10
 
+# C0, DEL and C1 controls must not reach Redis-backed LLDP fields or logs.
+LLDP_CONTROL_CHARACTERS = dict.fromkeys(list(range(32)) + list(range(127, 160)))
+
+
+def sanitize_lldp_strings(value):
+    if isinstance(value, str):
+        return value.translate(LLDP_CONTROL_CHARACTERS)
+    if isinstance(value, list):
+        return [sanitize_lldp_strings(item) for item in value]
+    if isinstance(value, dict):
+        return {
+            sanitize_lldp_strings(key): sanitize_lldp_strings(item)
+            for key, item in value.items()
+        }
+    return value
+
 # Match Front | Backplace | Management interface
 # TODO: Need to chamge to util function which can provide
 # backplane interface name.
@@ -176,8 +192,10 @@ class LldpSyncDaemon(SonicSyncDaemon):
             return None
 
         try:
-            # parse the scrapped output
-            lldpctl_json = json.loads(lldpctl_output)
+            # Some remote TLVs contain raw controls that make otherwise valid
+            # lldpctl output fail strict JSON parsing. Strip them immediately
+            # after parsing, before values are logged or written to Redis.
+            lldpctl_json = sanitize_lldp_strings(json.loads(lldpctl_output, strict=False))
         except ValueError:
             logger.exception("Failed to parse lldpctl output")
             return None
@@ -324,18 +342,29 @@ class LldpSyncDaemon(SonicSyncDaemon):
                 )
 
     def parse_port(self, port_attributes):
+        if not isinstance(port_attributes, dict):
+            logger.warning("Invalid LLDP port attributes")
+            return ('', '', '')
+
         port_identifiers = port_attributes.get('id')
+        if not isinstance(port_identifiers, dict):
+            port_identifiers = {}
+        value = port_identifiers.get('value', '')
+        if not isinstance(value, str):
+            value = ''
         try:
             subtype = str(self.PortIdSubtypeMap[port_identifiers['type']].value)
-            value = port_identifiers['value']
+        except (KeyError, TypeError, ValueError):
+            logger.warning("Could not infer LLDP port subtype")
+            subtype = ''
 
-        except ValueError:
-            logger.exception("Could not infer chassis subtype from: {}".format(port_attributes))
-            subtype, value = None
+        descr = port_attributes.get('descr', '')
+        if not isinstance(descr, str):
+            descr = ''
 
         return (subtype,
                 value,
-                port_attributes.get('descr', ''),
+                descr,
                 )
 
     def cache_diff(self, cache, update):
