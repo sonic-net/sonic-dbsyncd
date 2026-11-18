@@ -58,6 +58,7 @@ class TestLldpSyncDaemon(TestCase):
 
     def test_appl_db_uses_unix_socket(self):
         self.assertIs(self.daemon.db_connector.use_unix_socket_path, True)
+        self.assertIs(self.daemon.db_connector.authenticate, True)
         self.assertEqual(
             self.daemon.db_connector.connected_dbs,
             [self.daemon.db_connector.APPL_DB]
