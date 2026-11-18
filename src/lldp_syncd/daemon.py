@@ -19,7 +19,7 @@ DEFAULT_UPDATE_INTERVAL = 10
 # Match Front | Backplace | Management interface
 # TODO: Need to chamge to util function which can provide
 # backplane interface name.
-SONIC_ETHERNET_RE_PATTERN = r'^(Ethernet(\d+)|Ethernet-BP(\d+)|eth0)$'
+SONIC_ETHERNET_RE_PATTERN = r'^(Ethernet(\d+)|Ethernet-BP(\d+)|eth(\d+))$'
 LLDPD_UPTIME_RE_SPLIT_PATTERN = r' days?, '
 
 
