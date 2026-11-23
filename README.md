@@ -13,7 +13,7 @@ path remains available.
 Local builds and CI use the maintained SONiC registry `main` and Bazel Central
 Registry, as declared in each workspace's `.bazelrc`. The published
 `tar.bzl@0.10.5.sonic.2` preserves timestamps, and
-`rules_distroless@0.9.4.sonic.20` supplies the public C++ imports compatible with
+`rules_distroless@0.9.4.sonic.25` supplies the public C++ imports compatible with
 Bazel 8.5.1. No temporary catalog or registry flags are needed.
 
 ```sh

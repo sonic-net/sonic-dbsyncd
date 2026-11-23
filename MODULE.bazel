@@ -7,15 +7,15 @@ module(
     ],
 )
 
-bazel_dep(name = "rules_python", version = "1.9.0.sonic.1")
+bazel_dep(name = "rules_python", version = "1.9.0.sonic.2")
 bazel_dep(name = "aspect_bazel_lib", version = "2.19.3")
 bazel_dep(name = "rules_pkg", version = "1.1.0")
 bazel_dep(name = "tar.bzl", version = "0.10.5.sonic.2")
-bazel_dep(name = "rules_distroless", version = "0.9.4.sonic.22")
+bazel_dep(name = "rules_distroless", version = "0.9.4.sonic.25")
 bazel_dep(name = "platforms", version = "1.1.0")
 bazel_dep(
     name = "sonic-build-infra",
-    version = "0.0.38-0baa4acc9eac9ccc793b81104b1580d530271cbe",
+    version = "0.0.44-35726399908a3beb947174e9359f902077928289",
     repo_name = "sonic_build_infra",
 )
 bazel_dep(
