@@ -105,10 +105,13 @@ class MockConnector(object):
     CONFIG_DB = 4
     data = {}
 
-    def __init__(self):
-        pass
+    def __init__(self, use_unix_socket_path=False, namespace=''):
+        self.use_unix_socket_path = use_unix_socket_path
+        self.namespace = namespace
+        self.connected_dbs = []
 
-    def connect(self, db_id):
+    def connect(self, db_id, retry_on=True):
+        self.connected_dbs.append(db_id)
         if db_id == 0:
             with open(INPUT_DIR + '/LLDP_ENTRY_TABLE.json') as f:
                 db = json.load(f)

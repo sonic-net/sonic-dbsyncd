@@ -42,7 +42,7 @@ jobs:
           python3 - <<'PY'
           import os, shlex, shutil
           from pathlib import Path
-          main = 'https://raw.githubusercontent.com/securely1g/sonic-bazel-registry/main'
+          main = 'https://raw.githubusercontent.com/sonic-net/sonic-bazel-registry/main'
           caches = [line for line in (Path.home() / '.bazelrc').read_text().splitlines()
                     if line.startswith(('build --disk_cache=', 'common --repository_cache='))]
           assert len(caches) == 2

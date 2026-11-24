@@ -71,7 +71,7 @@ def main():
         "tested_revision_parents": parents,
         "pull_request_head": os.environ.get("CI_HEAD_SHA", ""),
         "pull_request_base": base,
-        "registry_url": "https://raw.githubusercontent.com/securely1g/sonic-bazel-registry/main",
+        "registry_url": "https://raw.githubusercontent.com/sonic-net/sonic-bazel-registry/main",
         "architecture": platform.machine(),
         "os_release": Path("/etc/os-release").read_text(),
         "wheel": wheel.name,

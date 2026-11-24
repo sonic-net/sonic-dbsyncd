@@ -6,7 +6,6 @@ import json
 import os
 from pathlib import Path
 import re
-import socket
 import subprocess
 import sys
 import tempfile
@@ -24,26 +23,23 @@ def main():
     runtime = Path(os.environ["SWSS_RUNTIME_ROOT"]).resolve()
     executable = runtime / "usr/bin/redis-server"
     assert executable.is_file() and executable.resolve().is_relative_to(runtime)
-    with tempfile.TemporaryDirectory(dir=os.environ["TEST_TMPDIR"]) as temporary:
+    # Keep the socket path within Linux's sockaddr_un limit even under long Bazel paths.
+    with tempfile.TemporaryDirectory(prefix="dbsyncd-", dir="/tmp") as temporary:
         work = Path(temporary)
-        # Native SonicV2Connector defaults to TCP. Reserve a fresh loopback
-        # endpoint; never use an agent's configured Redis instance.
-        with socket.socket() as reserve:
-            reserve.bind(("127.0.0.1", 0))
-            port = reserve.getsockname()[1]
+        redis_socket = str(work / "redis.sock")
         config = work / "database_config.json"
         config.write_text(json.dumps({
-            "INSTANCES": {"redis": {"hostname": "127.0.0.1", "port": port,
-                                    "unix_socket_path": str(work / "redis.sock")}},
+            "INSTANCES": {"redis": {"hostname": "127.0.0.1", "port": 0,
+                                    "unix_socket_path": redis_socket}},
             "DATABASES": {"APPL_DB": {"id": 0, "separator": ":", "instance": "redis"}},
             "VERSION": "1.0",
         }))
         with (work / "redis.log").open("w+") as log:
-            process = subprocess.Popen([str(executable), "--bind", "127.0.0.1", "--port", str(port),
+            process = subprocess.Popen([str(executable), "--port", "0", "--unixsocket", redis_socket,
                                         "--save", "", "--appendonly", "no", "--dir", str(work)],
                                        stdout=log, stderr=subprocess.STDOUT)
             try:
-                client = redis.Redis(host="127.0.0.1", port=port, db=0, decode_responses=True,
+                client = redis.Redis(unix_socket_path=redis_socket, db=0, decode_responses=True,
                                      socket_timeout=1, socket_connect_timeout=1)
                 deadline = time.monotonic() + 15
                 while True:
