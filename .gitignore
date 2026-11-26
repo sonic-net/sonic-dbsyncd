@@ -134,3 +134,11 @@ com_crashlytics_export_strings.xml
 crashlytics.properties
 crashlytics-build.properties
 fabric.properties
+
+# Local Bazel outputs and generated dependency evidence.
+/bazel-*
+/.bazelrc.user
+MODULE.bazel.lock
+/bazel-evidence/
+/tests/bazel/bazel-*
+/tests/bazel/.bazelrc.user

@@ -1,0 +1,24 @@
+load("@rules_python//python:py_library.bzl", "py_library")
+
+package(default_visibility = ["//visibility:public"])
+
+# The library imports the reusable Common binding from its owner. The module
+# CLI is installed in the wheel; its sonic-py-common options helper is supplied
+# by the SONiC application, not rebuilt or copied into this source package.
+py_library(
+    name = "lldp_syncd",
+    srcs = glob(
+        ["*.py"],
+        exclude = ["__main__.py"],
+    ),
+    imports = [".."],
+    deps = [
+        "//src/sonic_syncd",
+        "@sonic_swss_common//pyext:swsscommon",
+    ],
+)
+
+filegroup(
+    name = "wheel_sources",
+    srcs = glob(["*.py"]),
+)

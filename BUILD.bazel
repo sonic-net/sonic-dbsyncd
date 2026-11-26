@@ -1,0 +1,119 @@
+load("@aspect_bazel_lib//lib:run_binary.bzl", "run_binary")
+load("@rules_pkg//pkg:mappings.bzl", "REMOVE_BASE_DIRECTORY", "pkg_attributes", "pkg_files")
+load("@rules_pkg//pkg:tar.bzl", "pkg_tar")
+load("@rules_python//python:packaging.bzl", "py_wheel")
+load("@sonic_build_infra//python:wheel_layer.bzl", "wheel_layer")
+
+package(default_visibility = ["//visibility:public"])
+
+alias(
+    name = "sonic_syncd",
+    actual = "//src/sonic_syncd",
+)
+
+alias(
+    name = "lldp_syncd",
+    actual = "//src/lldp_syncd",
+)
+
+# Match find_packages('src') without including another owner's runtime files.
+filegroup(
+    name = "wheel_payload",
+    srcs = [
+        "//src/lldp_syncd:wheel_sources",
+        "//src/sonic_syncd:wheel_sources",
+    ],
+)
+
+py_wheel(
+    name = "sonic_dbsyncd_wheel",
+    author = "SONiC Team",
+    author_email = "linuxnetdev@microsoft.com",
+    classifiers = [
+        "Intended Audience :: Developers",
+        "Operating System :: Linux",
+        "Programming Language :: Python :: 3.7",
+    ],
+    distribution = "sonic-d",
+    extra_distinfo_files = {"LICENSE": "licenses/LICENSE"},
+    extra_requires = {"high_perf": []},
+    license = "Apache 2.0",
+    python_tag = "py3",
+    strip_path_prefixes = ["src"],
+    version = "2.0.0",
+    deps = [":wheel_payload"],
+)
+
+# Install only this owner's wheel. The consuming application supplies the
+# source Common binding and sonic-py-common, as the legacy Docker image does.
+wheel_layer(
+    name = "installed_wheel",
+    site_packages = "/usr/local/lib/python3.13/dist-packages",
+    target_compatible_with = [
+        "@platforms//os:linux",
+        "@platforms//cpu:x86_64",
+        "@sonic_build_infra//platforms:trixie",
+    ],
+    visibility = ["//visibility:private"],
+    wheels = [":sonic_dbsyncd_wheel"],
+)
+
+# rules_python marks every ZIP entry executable. Preserve the legacy source
+# file modes in the installed image with upstream extraction/packaging rules.
+run_binary(
+    name = "installed_tree",
+    srcs = [":installed_wheel"],
+    args = [
+        "-xf",
+        "$(location :installed_wheel)",
+        "-C",
+        "$(RULEDIR)/installed_tree",
+    ],
+    env = {"LANG": "C.UTF-8"},
+    out_dirs = ["installed_tree"],
+    tool = "@bsd_tar_toolchains_linux_amd64//:tar",
+    visibility = ["//visibility:private"],
+)
+
+pkg_files(
+    name = "installed_files",
+    srcs = [":installed_tree"],
+    attributes = pkg_attributes(mode = "0644"),
+    renames = {":installed_tree": REMOVE_BASE_DIRECTORY},
+    visibility = ["//visibility:private"],
+)
+
+pkg_tar(
+    name = "sonic_dbsyncd_runtime",
+    srcs = [":installed_files"],
+    mode = "0644",
+    mtime = 0,
+    owner = "0.0",
+    portable_mtime = False,
+    target_compatible_with = [
+        "@platforms//os:linux",
+        "@platforms//cpu:x86_64",
+        "@sonic_build_infra//platforms:trixie",
+    ],
+)
+
+exports_files(["setup.py"])
+
+filegroup(
+    name = "test_sources",
+    testonly = True,
+    srcs = [
+        "LICENSE",
+        "pytest.ini",
+        "setup.cfg",
+        "setup.py",
+        ":wheel_payload",
+    ] + glob(
+        ["tests/**"],
+        exclude = [
+            "tests/bazel/**",
+            "**/__pycache__/**",
+            "**/*.pyc",
+        ],
+    ),
+)
