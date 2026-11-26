@@ -30,7 +30,7 @@ single_version_override(module_name = "sonic-dash", version = "0.0.1-d5c003dd777
 single_version_override(module_name = "sonic-dash-api", version = "0.0.6-55310bf7437d67411418c974587adcdc1b194d6b")
 single_version_override(module_name = "sonic-fips", version = "1.11.0-2ed0920f2fea7940f4b2b7f5c37e51e225eb1ea6")
 single_version_override(module_name = "sonic-sairedis", version = "0.0.5-6b9b254c0d083f3c75e20c61e88e083a7acf0a67")
-single_version_override(module_name = "sonic-swss-common", version = "0.0.8-2a4ddd070edb719f2e969a880a5cfff711e64e72")
+single_version_override(module_name = "sonic-swss-common", version = "0.0.9-e06d5157d0a6a7228c8ba7357bdfd5e03623e586")
 single_version_override(module_name = "sonic-yang-models", version = "1.0.1-dd732f9512a84966487951250adae8e3e5c9943e")
 single_version_override(module_name = "tar.bzl", version = "0.10.5.sonic.2")
 
@@ -71,7 +71,7 @@ bazel_dep(name = "rules_shell", version = "0.8.0")
 bazel_dep(name = "patchelf", version = "0.18.0.bcr.1")
 bazel_dep(name = "platforms", version = "1.1.0")
 bazel_dep(name = "sonic-build-infra", version = "0.0.45-77ef625a4ddafc8cdc15f3cc6aee31eabac8a5de", repo_name = "sonic_build_infra")
-bazel_dep(name = "sonic-swss-common", version = "0.0.8-2a4ddd070edb719f2e969a880a5cfff711e64e72", repo_name = "sonic_swss_common")
+bazel_dep(name = "sonic-swss-common", version = "0.0.9-e06d5157d0a6a7228c8ba7357bdfd5e03623e586", repo_name = "sonic_swss_common")
 
 # The test image and the shared toolchains must use the same APT package graph.
 apt = use_extension("@rules_distroless//apt:extensions.bzl", "apt")
