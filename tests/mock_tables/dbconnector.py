@@ -105,8 +105,9 @@ class MockConnector(object):
     CONFIG_DB = 4
     data = {}
 
-    def __init__(self, use_unix_socket_path=False, namespace=''):
+    def __init__(self, use_unix_socket_path=False, namespace='', authenticate=False):
         self.use_unix_socket_path = use_unix_socket_path
+        self.authenticate = authenticate
         self.namespace = namespace
         self.connected_dbs = []
 
