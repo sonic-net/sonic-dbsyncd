@@ -45,6 +45,26 @@
         }
       },
       {
+        "Ethernet47": {
+          "via": "LLDP",
+          "rid": "80",
+          "age": "0 day, 00:00:05",
+          "chassis": {
+            "id": {
+              "type": "mac",
+              "value": "e4:f4:c6:da:8d:d0"
+            }
+          },
+          "port": {
+            "id": {
+              "type": "ifname",
+              "value": "g5"
+            },
+            "ttl": "120"
+          }
+        }
+      },
+      {
         "Ethernet100": {
           "rid": "1",
           "port": {
